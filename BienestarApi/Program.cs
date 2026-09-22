@@ -1,6 +1,9 @@
 using System.Text;
 using BienestarApi.Data;
+using BienestarApi.Models;
+using BienestarApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,6 +17,13 @@ builder.Services.AddOpenApi();
 // (ConnectionStrings:DefaultConnection) para no hardcodear credenciales.
 builder.Services.AddDbContext<BienestarDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Autenticación (Sprint 2): hashing de contraseñas (PBKDF2, el mismo
+// algoritmo probado que usa ASP.NET Core Identity, sin traer todo Identity)
+// y los servicios propios de token/login.
+builder.Services.AddScoped<IPasswordHasher<Cuenta>, PasswordHasher<Cuenta>>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Autenticación JWT: se configura el esquema de validación de tokens desde
 // ya (Sprint 1), aunque el endpoint de login que EMITE el token se

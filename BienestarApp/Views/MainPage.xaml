@@ -22,9 +22,11 @@
                 SemanticProperties.HeadingLevel="Level1" />
 
             <Label
-                Text="Sprint 1: esqueleto de arquitectura (MVVM)"
+                Text="{Binding EstadoSesion}"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2" />
+
+            <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" />
         </VerticalStackLayout>
     </ScrollView>
 

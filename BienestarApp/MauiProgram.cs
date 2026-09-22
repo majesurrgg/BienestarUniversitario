@@ -1,4 +1,5 @@
-﻿using BienestarApp.ViewModels;
+﻿using BienestarApp.Services;
+using BienestarApp.ViewModels;
 using BienestarApp.Views;
 using Microsoft.Extensions.Logging;
 
@@ -28,18 +29,26 @@ public static class MauiProgram
 
 	// Inyección de dependencias: Vistas y ViewModels se registran aquí para
 	// que .NET MAUI resuelva sus constructores automáticamente (constructor
-	// injection). En Sprint 2 aquí también se registrarán los Services/
-	// (ej. HttpClient tipado hacia BienestarApi, servicio de autenticación).
+	// injection).
 	private static void RegisterAppServices(IServiceCollection services)
 	{
 		// Views
+		services.AddTransient<Views.LoginPage>();
+		services.AddTransient<Views.RegisterPage>();
 		services.AddTransient<MainPage>();
 
 		// ViewModels
+		services.AddTransient<LoginViewModel>();
+		services.AddTransient<RegisterViewModel>();
 		services.AddTransient<MainViewModel>();
 
-		// Services (Sprint 2)
-		// services.AddSingleton<IApiService, ApiService>();
-		// services.AddSingleton<IAuthService, AuthService>();
+		// Services: HttpClient tipado hacia BienestarApi + servicios propios.
+		// Singleton porque no guardan estado por pantalla (la sesión vive en
+		// SecureStorage, no en memoria del servicio).
+		services.AddHttpClient<IApiService, ApiService>(client =>
+		{
+			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
+		});
+		services.AddSingleton<IAuthService, AuthService>();
 	}
 }

@@ -1,15 +1,59 @@
+using BienestarApp.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
 namespace BienestarApp.ViewModels;
 
 /// <summary>
-/// ViewModel de la página principal. En el Sprint 1 no contiene lógica de
-/// negocio: solo demuestra el enlace (binding) entre Vista y ViewModel.
-/// En Sprint 2 aquí se orquestarán llamadas a Services/ (por ejemplo,
-/// autenticación y consumo de la API) para poblar el estado de la pantalla.
+/// Pantalla principal tras el login. Al aparecer (ver MainPage.xaml.cs)
+/// pide el token guardado y llama a un endpoint protegido, solo para
+/// demostrar que el circuito completo funciona: login -> token guardado
+/// -> header Authorization -> [Authorize] del backend lo acepta.
 /// </summary>
 public partial class MainViewModel : BaseViewModel
 {
-    public MainViewModel()
+    private readonly IAuthService authService;
+    private readonly IApiService apiService;
+
+    [ObservableProperty]
+    private string estadoSesion = string.Empty;
+
+    public MainViewModel(IAuthService authService, IApiService apiService)
     {
+        this.authService = authService;
+        this.apiService = apiService;
         Title = "Bienestar Universitario";
+    }
+
+    public async Task InicializarAsync()
+    {
+        var nombre = await authService.ObtenerNombreAsync();
+        Title = string.IsNullOrEmpty(nombre) ? "Bienestar Universitario" : $"Hola, {nombre}";
+
+        var token = await authService.ObtenerTokenAsync();
+        if (string.IsNullOrEmpty(token))
+        {
+            EstadoSesion = "Sin sesión activa.";
+            return;
+        }
+
+        try
+        {
+            var valido = await apiService.VerificarSesionAsync(token);
+            EstadoSesion = valido
+                ? "Sesión verificada contra la API (endpoint protegido con JWT)."
+                : "El token guardado ya no es válido.";
+        }
+        catch
+        {
+            EstadoSesion = "No se pudo contactar a la API para verificar la sesión.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task CerrarSesionAsync()
+    {
+        await authService.CerrarSesionAsync();
+        await Shell.Current.GoToAsync("//LoginPage");
     }
 }

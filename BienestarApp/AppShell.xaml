@@ -4,11 +4,16 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:BienestarApp.Views"
+    Shell.FlyoutBehavior="Disabled"
     Title="BienestarApp">
 
+    <!-- Único ShellContent: la app siempre arranca en Login. MainPage y
+         RegisterPage se registran como rutas en AppShell.xaml.cs (no como
+         ShellContent) para que Shell no dibuje una barra de tabs con ambas
+         pantallas — son pasos de un flujo, no secciones de navegación. -->
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate views:MainPage}"
-        Route="MainPage" />
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
 
 </Shell>
