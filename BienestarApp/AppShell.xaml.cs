@@ -8,9 +8,8 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        // Rutas para páginas a las que se navega con GoToAsync pero que no
-        // son pestañas de la barra de navegación (ver AppShell.xaml).
+        // Ruta para una página que se apila encima de Login con GoToAsync
+        // (ver AppShell.xaml; MainPage ya es raíz ahí).
         Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
-        Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
     }
 }

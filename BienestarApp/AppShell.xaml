@@ -7,13 +7,21 @@
     Shell.FlyoutBehavior="Disabled"
     Title="BienestarApp">
 
-    <!-- Único ShellContent: la app siempre arranca en Login. MainPage y
-         RegisterPage se registran como rutas en AppShell.xaml.cs (no como
-         ShellContent) para que Shell no dibuje una barra de tabs con ambas
-         pantallas — son pasos de un flujo, no secciones de navegación. -->
+    <!-- La app arranca en Login (primer ShellContent). LoginPage y MainPage
+         son raíces de Shell para poder saltar entre ellas con rutas
+         absolutas ("//MainPage", "//LoginPage") y que el botón "atrás" no
+         regrese al login tras iniciar sesión. Con el flyout deshabilitado
+         y cada una en su propio ShellContent, Shell no dibuja tabs.
+         RegisterPage sí es una ruta registrada en AppShell.xaml.cs porque
+         se apila encima de Login (se vuelve con ".."). -->
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
+
+    <ShellContent
+        Title="Inicio"
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Route="MainPage" />
 
 </Shell>

@@ -12,3 +12,6 @@ triviales; en Sprint 2+ delegan aquí):
 
 Sprint 1: carpeta vacía (solo estructura, sin lógica de negocio ni login
 funcional — eso corresponde a Sprint 2).
+
+BienestarApp (.NET MAUI, solo Android)
+BienestarApi (.NET 8 Web API, solo backend)
