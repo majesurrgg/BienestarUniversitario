@@ -23,4 +23,7 @@ public interface IApiService
 
     /// <summary>Encuesta basal (Sprint 3). Lanza SesionExpiradaException si la API responde 401.</summary>
     Task<EncuestaBasalResponse> CrearEncuestaBasalAsync(string token, EncuestaBasalRequest request);
+
+    /// <summary>Fases (Basal/Final) que el usuario ya completó.</summary>
+    Task<List<FaseEncuesta>> ObtenerFasesEncuestaBasalCompletadasAsync(string token);
 }

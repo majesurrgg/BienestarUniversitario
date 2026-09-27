@@ -12,14 +12,20 @@ namespace BienestarApp.ViewModels;
 /// (con el protocolo del ítem 9), IPAQ corto, y SISCO SV-21 — los tres
 /// instrumentos se reproducen tal cual sus fuentes originales, sin
 /// parafrasear ni reordenar ítems (afectaría su validez psicométrica).
+///
+/// Se presenta como asistente de 4 pasos (uno por instrumento + revisión)
+/// en vez de un formulario largo de una sola pantalla: son 37 preguntas en
+/// total, y de un solo tirón resulta abrumador para responder bien.
 /// </summary>
 public partial class EncuestaBasalViewModel : BaseViewModel
 {
     private readonly IEncuestaBasalService encuestaBasalService;
     private readonly IAuthService authService;
 
+    private const int TotalPasos = 4;
+    private FaseEncuesta? faseActual;
+
     // ---------- PHQ-9 (Patient Health Questionnaire-9) ----------
-    // Instrumento estandarizado y de dominio público, dominio clínico.
     private static readonly string[] TextosPhq9 =
     [
         "Poco interés o placer en hacer las cosas",
@@ -34,11 +40,6 @@ public partial class EncuestaBasalViewModel : BaseViewModel
     ];
 
     // ---------- SISCO SV-21 (Inventario SISCO, Barraza, 2018) ----------
-    // Texto tomado literal de la "Ficha técnica del Inventario SISCO SV-21"
-    // (fuente original, no de resúmenes de terceros). El ítem de intensidad
-    // (escala 1-5) que trae el instrumento se omite a propósito: el propio
-    // autor lo declara opcional/descartable y NO entra en la fórmula de
-    // puntaje ("Clave de corrección" solo usa las preguntas 3, 4 y 5).
     private static readonly string[] TextosSiscoEstresores =
     [
         "La sobrecarga de tareas y trabajos escolares que tengo que realizar todos los días",
@@ -75,22 +76,56 @@ public partial class EncuestaBasalViewModel : BaseViewModel
     public ObservableCollection<PreguntaSiscoItem> PreguntasSintomas { get; }
     public ObservableCollection<PreguntaSiscoItem> PreguntasEstrategias { get; }
 
-    public List<string> FasesDisponibles { get; } = ["Basal", "Final"];
     public List<string> OpcionesSiNo { get; } = ["Sí", "No"];
 
+    // ---------- Estado del asistente (wizard) ----------
     [ObservableProperty]
-    private string faseSeleccionada = "Basal";
+    [NotifyPropertyChangedFor(nameof(EnPasoPhq9))]
+    [NotifyPropertyChangedFor(nameof(EnPasoIpaq))]
+    [NotifyPropertyChangedFor(nameof(EnPasoSisco))]
+    [NotifyPropertyChangedFor(nameof(EnPasoRevision))]
+    [NotifyPropertyChangedFor(nameof(MostrarAnterior))]
+    [NotifyPropertyChangedFor(nameof(TextoPaso))]
+    [NotifyPropertyChangedFor(nameof(IconoPaso))]
+    [NotifyPropertyChangedFor(nameof(TituloPaso))]
+    [NotifyPropertyChangedFor(nameof(Progreso))]
+    private int paso;
 
-    // Ítem 1 (filtro) del SISCO: "¿has tenido momentos de preocupación o
-    // nerviosismo (estrés)?". Si responde "No", el propio instrumento dice
-    // que el cuestionario se da por concluido — no se piden los 21 ítems.
+    public bool EnPasoPhq9 => Paso == 0;
+    public bool EnPasoIpaq => Paso == 1;
+    public bool EnPasoSisco => Paso == 2;
+    public bool EnPasoRevision => Paso == 3;
+    public bool MostrarAnterior => Paso > 0;
+    public string TextoPaso => $"Paso {Paso + 1} de {TotalPasos}";
+    public double Progreso => (Paso + 1) / (double)TotalPasos;
+
+    // Ícono + título grandes por paso — el toque "vivo" que pediste, sin
+    // depender de imágenes externas: son emoji (se ven en cualquier
+    // celular, sin descargar nada) y la Vista los anima con un pequeño
+    // "rebote" cada vez que cambias de paso (ver EncuestaBasalPage.xaml.cs).
+    public string IconoPaso => Paso switch
+    {
+        0 => "🧠",
+        1 => "🏃",
+        2 => "📚",
+        _ => "✅",
+    };
+    public string TituloPaso => Paso switch
+    {
+        0 => "PHQ-9 · Estado de ánimo",
+        1 => "IPAQ · Actividad física",
+        2 => "SISCO · Estrés académico",
+        _ => "Revisión y envío",
+    };
+
+    // Ítem 1 (filtro) del SISCO.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MostrarPreguntasSisco))]
     private string respuestaFiltroSisco = string.Empty;
 
     public bool MostrarPreguntasSisco => RespuestaFiltroSisco == "Sí";
 
-    // --- IPAQ corto (International Physical Activity Questionnaire) ---
+    // --- IPAQ corto ---
     [ObservableProperty] private string ipaqVigorosoDias = "0";
     [ObservableProperty] private string ipaqVigorosoMinutos = "0";
     [ObservableProperty] private string ipaqModeradoDias = "0";
@@ -98,8 +133,30 @@ public partial class EncuestaBasalViewModel : BaseViewModel
     [ObservableProperty] private string ipaqCaminataDias = "0";
     [ObservableProperty] private string ipaqCaminataMinutos = "0";
 
-    [ObservableProperty] private string mensajeError = string.Empty;
-    [ObservableProperty] private bool enviado;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostrarAsistente))]
+    private string mensajeError = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostrarAsistente))]
+    private bool enviado;
+
+    [ObservableProperty] private string resumenPrevio = string.Empty;
+
+    // --- Estado de acceso (gating por fase) ---
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostrarAsistente))]
+    private bool cargandoEstado = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostrarAsistente))]
+    private bool accesoBloqueado;
+
+    [ObservableProperty] private string mensajeBloqueo = string.Empty;
+    [ObservableProperty] private string faseActualTexto = string.Empty;
+
+    /// <summary>Solo se ve el asistente cuando ya se sabe la fase, el acceso no está bloqueado, y no se envió todavía.</summary>
+    public bool MostrarAsistente => !CargandoEstado && !AccesoBloqueado && !Enviado;
 
     public EncuestaBasalViewModel(IEncuestaBasalService encuestaBasalService, IAuthService authService)
     {
@@ -114,37 +171,103 @@ public partial class EncuestaBasalViewModel : BaseViewModel
         PreguntasEstrategias = new ObservableCollection<PreguntaSiscoItem>(TextosSiscoEstrategias.Select(t => new PreguntaSiscoItem(t)));
     }
 
-    [RelayCommand]
-    private async Task EnviarAsync()
+    /// <summary>
+    /// Decide qué fase toca (Basal si no existe, si no Final) y bloquea el
+    /// acceso si ya se completaron las dos. Se llama al abrir la pantalla —
+    /// nunca se confía solo en la validación del servidor al enviar, para
+    /// no dejar que alguien llene 37 preguntas y recién ahí se entere de
+    /// que la fase ya estaba hecha.
+    /// </summary>
+    public async Task InicializarAsync()
     {
-        if (IsBusy) return;
+        CargandoEstado = true;
+        AccesoBloqueado = false;
+        MensajeError = string.Empty;
+        Paso = 0;
+
+        try
+        {
+            var completadas = await encuestaBasalService.ObtenerFasesCompletadasAsync();
+
+            if (completadas.Contains(FaseEncuesta.Basal) && completadas.Contains(FaseEncuesta.Final))
+            {
+                AccesoBloqueado = true;
+                MensajeBloqueo = "Ya completaste las dos fases de la encuesta basal (inicial y final). No hace falta volver a llenarla.";
+                faseActual = null;
+            }
+            else if (completadas.Contains(FaseEncuesta.Basal))
+            {
+                faseActual = FaseEncuesta.Final;
+                FaseActualTexto = "Fase: Final (cierre del piloto)";
+            }
+            else
+            {
+                faseActual = FaseEncuesta.Basal;
+                FaseActualTexto = "Fase: Basal (inicial)";
+            }
+        }
+        catch (SesionExpiradaException)
+        {
+            await VolverAlLoginAsync();
+        }
+        catch (Exception)
+        {
+            MensajeError = "No se pudo comprobar el estado de tu encuesta. Revisa tu conexión y vuelve a intentar.";
+            AccesoBloqueado = true; // más seguro no dejar llenar 37 preguntas sin saber si ya las hizo.
+        }
+        finally
+        {
+            CargandoEstado = false;
+        }
+    }
+
+    [RelayCommand]
+    private void Siguiente()
+    {
         MensajeError = string.Empty;
 
-        if (PreguntasPhq9.Any(p => p.Respuesta < 0))
+        if (Paso == 0 && PreguntasPhq9.Any(p => p.Respuesta < 0))
         {
             MensajeError = "Responde las 9 preguntas del PHQ-9 (todas son obligatorias).";
             return;
         }
-
-        if (!TryParseIpaq(out var puntajeIpaq, out var errorIpaq))
+        if (Paso == 1 && !TryParseIpaq(out _, out var errorIpaq))
         {
             MensajeError = errorIpaq;
             return;
         }
-
-        if (!TryCalcularPuntajeSisco(out var puntajeSisco, out var errorSisco))
+        if (Paso == 2 && !TryCalcularPuntajeSisco(out _, out var errorSisco))
         {
             MensajeError = errorSisco;
             return;
         }
 
+        if (Paso == 2) ArmarResumenPrevio();
+        Paso++;
+    }
+
+    [RelayCommand]
+    private void Anterior()
+    {
+        MensajeError = string.Empty;
+        if (Paso > 0) Paso--;
+    }
+
+    [RelayCommand]
+    private async Task EnviarAsync()
+    {
+        if (IsBusy || faseActual is null) return;
+        MensajeError = string.Empty;
+
         try
         {
             IsBusy = true;
+            TryParseIpaq(out var puntajeIpaq, out _);
+            TryCalcularPuntajeSisco(out var puntajeSisco, out _);
 
             var respuesta = await encuestaBasalService.RegistrarAsync(new EncuestaBasalRequest
             {
-                Fase = FaseSeleccionada == "Final" ? FaseEncuesta.Final : FaseEncuesta.Basal,
+                Fase = faseActual.Value,
                 RespuestasPhq9 = [.. PreguntasPhq9.Select(p => p.Respuesta)],
                 PuntajeSISCO = puntajeSisco,
                 PuntajeIPAQ = puntajeIpaq,
@@ -154,8 +277,6 @@ public partial class EncuestaBasalViewModel : BaseViewModel
 
             if (respuesta.RequiereAtencionInmediata)
             {
-                // Mensaje genérico + Línea 113 (opción Salud Mental, "Recibe
-                // Ayuda"), confirmado por la autora de la tesis.
                 await Shell.Current.CurrentPage.DisplayAlertAsync(
                     "Queremos que sepas que no estás solo(a)",
                     "Notamos una respuesta que sugiere que podrías estar pasando por un momento difícil. " +
@@ -174,7 +295,7 @@ public partial class EncuestaBasalViewModel : BaseViewModel
         }
         catch (Exception)
         {
-            MensajeError = "No se pudo conectar con el servidor. Revisa tu conexión y la URL de la API.";
+            MensajeError = "No se pudo enviar la encuesta. Revisa tu conexión con el servidor.";
         }
         finally
         {
@@ -190,6 +311,18 @@ public partial class EncuestaBasalViewModel : BaseViewModel
         await authService.CerrarSesionAsync();
         await Shell.Current.DisplayAlertAsync("Sesión expirada", "Tu sesión expiró. Vuelve a iniciar sesión.", "OK");
         await Shell.Current.GoToAsync("//LoginPage");
+    }
+
+    private void ArmarResumenPrevio()
+    {
+        TryParseIpaq(out var puntajeIpaq, out _);
+        TryCalcularPuntajeSisco(out var puntajeSisco, out _);
+        var puntajePhq9 = PreguntasPhq9.Sum(p => p.Respuesta);
+
+        ResumenPrevio =
+            $"PHQ-9: {puntajePhq9}/27\n" +
+            $"IPAQ: {puntajeIpaq} MET-min/semana\n" +
+            $"SISCO: {puntajeSisco}/100" + (RespuestaFiltroSisco == "No" ? " (sin estrés académico reportado)" : "");
     }
 
     /// <summary>

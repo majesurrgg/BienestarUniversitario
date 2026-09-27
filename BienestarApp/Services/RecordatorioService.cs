@@ -19,33 +19,51 @@ namespace BienestarApp.Services;
 public class RecordatorioService : IRecordatorioService
 {
     private const int NotificationId = 5001;
-    private const int HoraRecordatorio = 20; // 8:00 p. m., hora local del celular.
+    private const int HoraRecordatorio = 17; // hora local del celular. TODO: volver a 20 (8pm) después de probar.
 
-    public async Task ProgramarSiFaltaAsync(bool yaHizoCheckInHoy)
+    public async Task<string> ProgramarSiFaltaAsync(bool yaHizoCheckInHoy)
     {
         if (yaHizoCheckInHoy)
         {
             CancelarDeHoy();
-            return;
+            return "Ya hiciste tu check-in de hoy: recordatorio cancelado.";
         }
 
-        var permitido = await LocalNotificationCenter.Current.RequestNotificationPermission();
-        if (!permitido) return; // el estudiante no dio permiso de notificaciones; no insistimos aquí.
+        bool permitido;
+        try
+        {
+            permitido = await LocalNotificationCenter.Current.RequestNotificationPermission();
+        }
+        catch (Exception ex)
+        {
+            return $"Error al pedir permiso de notificaciones: {ex.Message}";
+        }
+
+        if (!permitido)
+            return "Permiso de notificaciones DENEGADO — actívalo en Ajustes del celular > Apps > BienestarApp > Notificaciones.";
 
         var ahora = DateTime.Now;
         var horaDisparo = new DateTime(ahora.Year, ahora.Month, ahora.Day, HoraRecordatorio, 0, 0);
         if (horaDisparo <= ahora)
-            horaDisparo = horaDisparo.AddDays(1); // ya pasaron las 8pm hoy: recuerda mañana a esa hora.
+            horaDisparo = horaDisparo.AddDays(1);
 
-        // Volver a llamar a Show con el mismo NotificationId reemplaza el
-        // recordatorio anterior — no hace falta cancelar antes.
-        await LocalNotificationCenter.Current.Show(new NotificationRequest
+        try
         {
-            NotificationId = NotificationId,
-            Title = "¿Cómo estuvo tu día?",
-            Description = "Todavía no registraste tu check-in de hoy en Bienestar Universitario.",
-            Schedule = new NotificationRequestSchedule { NotifyTime = horaDisparo },
-        });
+            var ok = await LocalNotificationCenter.Current.Show(new NotificationRequest
+            {
+                NotificationId = NotificationId,
+                Title = "¿Cómo estuvo tu día?",
+                Description = "Todavía no registraste tu check-in de hoy en Bienestar Universitario.",
+                Schedule = new NotificationRequestSchedule { NotifyTime = horaDisparo },
+            });
+            return ok
+                ? $"Recordatorio programado para las {horaDisparo:HH:mm} del {horaDisparo:dd/MM}."
+                : "LocalNotificationCenter.Show() devolvió false (no se programó).";
+        }
+        catch (Exception ex)
+        {
+            return $"Error al programar la notificación: {ex.Message}";
+        }
     }
 
     public void CancelarDeHoy() => LocalNotificationCenter.Current.Cancel(NotificationId);

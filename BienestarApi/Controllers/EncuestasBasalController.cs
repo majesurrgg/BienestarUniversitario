@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BienestarApi.DTOs.EncuestasBasal;
+using BienestarApi.Models.Enums;
 using BienestarApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,11 @@ public class EncuestasBasalController(IEncuestaBasalService encuestaBasalService
             return Conflict(new { message = ex.Message });
         }
     }
+
+    /// <summary>Fases (Basal/Final) que el usuario ya completó — la app la usa para no ofrecer una fase ya hecha.</summary>
+    [HttpGet("fases-completadas")]
+    public async Task<ActionResult<List<FaseEncuesta>>> ObtenerFasesCompletadas() =>
+        Ok(await encuestaBasalService.ObtenerFasesCompletadasAsync(UsuarioIdDelToken()));
 
     private int UsuarioIdDelToken() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

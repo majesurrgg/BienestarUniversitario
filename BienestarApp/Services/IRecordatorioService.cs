@@ -8,8 +8,13 @@ namespace BienestarApp.Services;
 /// </summary>
 public interface IRecordatorioService
 {
-    /// <summary>Programa el recordatorio de hoy si <paramref name="yaHizoCheckInHoy"/> es false; lo cancela si es true.</summary>
-    Task ProgramarSiFaltaAsync(bool yaHizoCheckInHoy);
+    /// <summary>
+    /// Programa el recordatorio de hoy si <paramref name="yaHizoCheckInHoy"/>
+    /// es false; lo cancela si es true. Devuelve una descripción corta de
+    /// qué pasó (programado/cancelado/permiso denegado), pensada para
+    /// mostrarse en pantalla mientras se depura (Sprint 4).
+    /// </summary>
+    Task<string> ProgramarSiFaltaAsync(bool yaHizoCheckInHoy);
 
     void CancelarDeHoy();
 }

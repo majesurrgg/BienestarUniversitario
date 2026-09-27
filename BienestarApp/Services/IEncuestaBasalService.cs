@@ -10,4 +10,7 @@ namespace BienestarApp.Services;
 public interface IEncuestaBasalService
 {
     Task<EncuestaBasalResponse> RegistrarAsync(EncuestaBasalRequest request);
+
+    /// <summary>Fases (Basal/Final) que el usuario ya completó.</summary>
+    Task<List<FaseEncuesta>> ObtenerFasesCompletadasAsync();
 }

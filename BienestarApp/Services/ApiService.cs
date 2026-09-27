@@ -64,6 +64,16 @@ public class ApiService(HttpClient http) : IApiService
         return (await response.Content.ReadFromJsonAsync<EncuestaBasalResponse>())!;
     }
 
+    public async Task<List<FaseEncuesta>> ObtenerFasesEncuestaBasalCompletadasAsync(string token)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Get, "api/encuestasbasal/fases-completadas");
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<List<FaseEncuesta>>())!;
+    }
+
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string ruta, TRequest body)
     {
         using var response = await http.PostAsJsonAsync(ruta, body);

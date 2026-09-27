@@ -1,3 +1,4 @@
+using BienestarApp.Models;
 using BienestarApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -5,30 +6,42 @@ using CommunityToolkit.Mvvm.Input;
 namespace BienestarApp.ViewModels;
 
 /// <summary>
-/// Pantalla principal tras el login. Al aparecer (ver MainPage.xaml.cs)
-/// pide el token guardado y llama a un endpoint protegido, solo para
-/// demostrar que el circuito completo funciona: login -> token guardado
-/// -> header Authorization -> [Authorize] del backend lo acepta.
+/// Pantalla principal tras el login. Decide el orden obligatorio del
+/// estudio: la encuesta basal (fase Basal) se completa una sola vez, antes
+/// de que se habilite el check-in diario — no tiene sentido medir el "día a
+/// día" sin la línea base con la que se va a comparar.
 /// </summary>
 public partial class MainViewModel : BaseViewModel
 {
     private readonly IAuthService authService;
     private readonly IApiService apiService;
     private readonly IRegistroDiarioService registroDiarioService;
+    private readonly IEncuestaBasalService encuestaBasalService;
     private readonly IRecordatorioService recordatorioService;
 
     [ObservableProperty]
     private string estadoSesion = string.Empty;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PuedeHacerCheckIn))]
+    private bool encuestaBasalCompletada;
+
+    [ObservableProperty]
+    private string estadoRecordatorio = string.Empty;
+
+    public bool PuedeHacerCheckIn => EncuestaBasalCompletada;
+
     public MainViewModel(
         IAuthService authService,
         IApiService apiService,
         IRegistroDiarioService registroDiarioService,
+        IEncuestaBasalService encuestaBasalService,
         IRecordatorioService recordatorioService)
     {
         this.authService = authService;
         this.apiService = apiService;
         this.registroDiarioService = registroDiarioService;
+        this.encuestaBasalService = encuestaBasalService;
         this.recordatorioService = recordatorioService;
         Title = "Bienestar Universitario";
     }
@@ -57,17 +70,30 @@ public partial class MainViewModel : BaseViewModel
             EstadoSesion = "No se pudo contactar a la API para verificar la sesión.";
         }
 
-        // Cada vez que se abre la pantalla principal se reevalúa el
-        // recordatorio de hoy — es el punto de entrada más frecuente de la
-        // app, así que es donde más chance hay de programarlo a tiempo.
         try
         {
-            var deHoy = await registroDiarioService.ObtenerDeHoyAsync();
-            await recordatorioService.ProgramarSiFaltaAsync(deHoy is not null);
+            var fases = await encuestaBasalService.ObtenerFasesCompletadasAsync();
+            EncuestaBasalCompletada = fases.Contains(FaseEncuesta.Basal);
         }
         catch
         {
-            // No crítico: si falla, CheckInPage lo vuelve a intentar cuando se visite.
+            EncuestaBasalCompletada = false;
+        }
+
+        // Cada vez que se abre la pantalla principal se reevalúa el
+        // recordatorio de hoy — es el punto de entrada más frecuente de la
+        // app, así que es donde más chance hay de programarlo a tiempo. El
+        // texto que devuelve es de diagnóstico (Sprint 4, quitar en Sprint
+        // final): sirve para confirmar en pantalla si quedó programado, sin
+        // depender del celular sonando en el momento exacto de probar.
+        try
+        {
+            var deHoy = EncuestaBasalCompletada ? await registroDiarioService.ObtenerDeHoyAsync() : null;
+            EstadoRecordatorio = await recordatorioService.ProgramarSiFaltaAsync(deHoy is not null);
+        }
+        catch (Exception ex)
+        {
+            EstadoRecordatorio = $"No se pudo evaluar el recordatorio: {ex.Message}";
         }
     }
 

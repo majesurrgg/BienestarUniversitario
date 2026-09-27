@@ -1,6 +1,7 @@
 using BienestarApi.Data;
 using BienestarApi.DTOs.EncuestasBasal;
 using BienestarApi.Models;
+using BienestarApi.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace BienestarApi.Services;
@@ -82,4 +83,10 @@ public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
             RequiereAtencionInmediata = requiereAtencion,
         };
     }
+
+    public async Task<List<FaseEncuesta>> ObtenerFasesCompletadasAsync(int usuarioId) =>
+        await db.EncuestasBasal
+            .Where(e => e.UsuarioId == usuarioId)
+            .Select(e => e.Fase)
+            .ToListAsync();
 }
