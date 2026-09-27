@@ -14,8 +14,16 @@ public class EncuestaBasal
     public int UsuarioId { get; set; }
     public Usuario Usuario { get; set; } = null!;
 
-    /// <summary>PHQ-9 (Patient Health Questionnaire-9): tamizaje de depresión, rango 0-27.</summary>
+    /// <summary>PHQ-9 (Patient Health Questionnaire-9): tamizaje de depresión, rango 0-27 (suma de los 9 ítems).</summary>
     public int PuntajePHQ9 { get; set; }
+
+    /// <summary>
+    /// Respuesta al ítem 9 del PHQ-9 (ideación suicida/autolesión), 0-3. Se
+    /// guarda aparte del total porque el protocolo ético reacciona a ESTE
+    /// ítem específico, no al puntaje agregado — un total bajo puede
+    /// esconder una respuesta positiva aquí. Ver <see cref="AlertaRiesgo"/>.
+    /// </summary>
+    public int RespuestaItem9 { get; set; }
 
     /// <summary>SISCO: inventario de estrés académico (puntaje/índice de estrés académico).</summary>
     public int PuntajeSISCO { get; set; }
