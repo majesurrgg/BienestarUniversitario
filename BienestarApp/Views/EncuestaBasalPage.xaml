@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             xmlns:items="clr-namespace:BienestarApp.ViewModels.Items"
+             x:Class="BienestarApp.Views.EncuestaBasalPage"
+             x:DataType="viewmodels:EncuestaBasalViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Resumen: si ya se envió -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding Enviado}">
+                <Label Text="✔ Encuesta enviada" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
+                <Label Text="Gracias por completarla." HorizontalOptions="Center" />
+                <Button Text="Volver" Command="{Binding VolverCommand}" />
+            </VerticalStackLayout>
+
+            <!-- Formulario -->
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding Enviado, Converter={StaticResource InvertedBoolConverter}}">
+
+                <Label Text="{Binding MensajeError}"
+                       TextColor="Red"
+                       IsVisible="{Binding MensajeError, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                <Label Text="Fase de la encuesta" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding FasesDisponibles}" SelectedItem="{Binding FaseSeleccionada}" />
+
+                <!-- ===================== PHQ-9 ===================== -->
+                <Label Text="PHQ-9" Style="{StaticResource Headline}" />
+                <Label Text="Durante las últimas 2 semanas, ¿con qué frecuencia te ha molestado cada uno de los siguientes problemas?" />
+
+                <CollectionView ItemsSource="{Binding PreguntasPhq9}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="items:PreguntaPhq9Item">
+                            <VerticalStackLayout Spacing="4" Margin="0,10">
+                                <Label FontAttributes="Bold">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Numero, StringFormat='{0}. '}" />
+                                            <Span Text="{Binding Texto}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Picker Title="Selecciona una respuesta" SelectedIndex="{Binding Respuesta}">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>Ningún día</x:String>
+                                            <x:String>Varios días</x:String>
+                                            <x:String>Más de la mitad de los días</x:String>
+                                            <x:String>Casi todos los días</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                </Picker>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- ===================== IPAQ ===================== -->
+                <Label Text="IPAQ — Actividad física (últimos 7 días)" Style="{StaticResource Headline}" />
+
+                <Label Text="Actividad física VIGOROSA (ej. correr, aeróbicos)" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label Text="Días por semana" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqVigorosoDias}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1">
+                        <Label Text="Minutos por día" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqVigorosoMinutos}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Label Text="Actividad física MODERADA (ej. bicicleta suave)" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label Text="Días por semana" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqModeradoDias}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1">
+                        <Label Text="Minutos por día" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqModeradoMinutos}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Label Text="CAMINATA (10 minutos o más seguidos)" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label Text="Días por semana" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqCaminataDias}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1">
+                        <Label Text="Minutos por día" FontSize="12" />
+                        <Entry Keyboard="Numeric" Text="{Binding IpaqCaminataMinutos}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- ===================== SISCO (placeholder) ===================== -->
+                <Label Text="SISCO — Estrés académico" Style="{StaticResource Headline}" />
+                <Border StrokeShape="RoundRectangle 8" Stroke="Orange" BackgroundColor="#FFF3E0" Padding="12">
+                    <Label TextColor="#8A5300"
+                           Text="Pendiente: aquí van las preguntas reales del inventario SISCO (confirmar versión y escala con tu asesor). Por ahora, ingresa el puntaje ya calculado." />
+                </Border>
+                <Label Text="Puntaje SISCO" FontAttributes="Bold" />
+                <Entry Keyboard="Numeric" Text="{Binding PuntajeSisco}" />
+
+                <Button Text="Enviar encuesta" Command="{Binding EnviarCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+                <Button Text="Volver" Command="{Binding VolverCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
