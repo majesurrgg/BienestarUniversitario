@@ -1,5 +1,7 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using BienestarApp.Models;
 
 namespace BienestarApp.Services;
@@ -21,16 +23,67 @@ public class ApiService(HttpClient http) : IApiService
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<RegistroDiarioResponse> CrearRegistroDiarioAsync(string token, RegistroDiarioRequest request)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Post, "api/registrosdiarios")
+        {
+            Content = JsonContent.Create(request),
+        };
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<RegistroDiarioResponse>())!;
+    }
+
+    public async Task<RegistroDiarioResponse?> ObtenerRegistroDiarioDeHoyAsync(string token)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Get, "api/registrosdiarios/hoy");
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+
+        // 204 = todavía no hizo el check-in de hoy.
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return null;
+
+        return await response.Content.ReadFromJsonAsync<RegistroDiarioResponse>();
+    }
+
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string ruta, TRequest body)
     {
         using var response = await http.PostAsJsonAsync(ruta, body);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<TResponse>())!;
+    }
 
-        if (!response.IsSuccessStatusCode)
+    private static async Task LanzarSiEsErrorAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        // Los endpoints protegidos responden 401 sin cuerpo cuando el token
+        // venció; el login responde 401 CON mensaje ("Email o contraseña
+        // incorrectos"). Por eso solo se trata como sesión expirada si no
+        // hay un mensaje de la API.
+        var error = await LeerErrorAsync(response);
+        if (response.StatusCode == HttpStatusCode.Unauthorized && error is null)
+            throw new SesionExpiradaException();
+
+        throw new ApiException(error ?? "No se pudo completar la solicitud.");
+    }
+
+    private static async Task<string?> LeerErrorAsync(HttpResponseMessage response)
+    {
+        try
         {
             var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-            throw new ApiException(error?.Message ?? "No se pudo completar la solicitud.");
+            return string.IsNullOrWhiteSpace(error?.Message) ? null : error.Message;
         }
-
-        return (await response.Content.ReadFromJsonAsync<TResponse>())!;
+        catch (Exception ex) when (ex is JsonException or NotSupportedException)
+        {
+            return null; // cuerpo vacío o sin la forma { "message": ... }
+        }
     }
 }

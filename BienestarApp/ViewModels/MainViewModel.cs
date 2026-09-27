@@ -51,6 +51,9 @@ public partial class MainViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private static async Task IrACheckInAsync() => await Shell.Current.GoToAsync(nameof(Views.CheckInPage));
+
+    [RelayCommand]
     private async Task CerrarSesionAsync()
     {
         await authService.CerrarSesionAsync();

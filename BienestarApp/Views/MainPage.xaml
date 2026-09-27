@@ -26,7 +26,9 @@
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2" />
 
-            <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" />
+            <Button Text="Registrar mi día" Command="{Binding IrACheckInCommand}" />
+
+            <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
         </VerticalStackLayout>
     </ScrollView>
 

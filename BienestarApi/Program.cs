@@ -25,6 +25,9 @@ builder.Services.AddScoped<IPasswordHasher<Cuenta>, PasswordHasher<Cuenta>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Sprint 3: check-in diario.
+builder.Services.AddScoped<IRegistroDiarioService, RegistroDiarioService>();
+
 // Autenticación JWT: se configura el esquema de validación de tokens desde
 // ya (Sprint 1), aunque el endpoint de login que EMITE el token se
 // implementa recién en el Sprint 2. Así el pipeline de middlewares y el

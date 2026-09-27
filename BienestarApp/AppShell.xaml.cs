@@ -11,5 +11,7 @@ public partial class AppShell : Shell
         // Ruta para una página que se apila encima de Login con GoToAsync
         // (ver AppShell.xaml; MainPage ya es raíz ahí).
         Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
+        // Se apila encima de MainPage (Sprint 3).
+        Routing.RegisterRoute(nameof(CheckInPage), typeof(CheckInPage));
     }
 }

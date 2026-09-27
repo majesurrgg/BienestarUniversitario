@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             x:Class="BienestarApp.Views.CheckInPage"
+             x:DataType="viewmodels:CheckInViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="16">
+
+            <Label Text="¿Cómo estuvo tu día?" Style="{StaticResource Headline}" HorizontalOptions="Center" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <!-- Formulario: solo si todavía no registró el día de hoy -->
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding MostrarFormulario}">
+
+                <Label Text="{Binding NivelEstres, StringFormat='Nivel de estrés: {0:F0} / 10'}" FontAttributes="Bold" />
+                <Slider Minimum="1" Maximum="10" Value="{Binding NivelEstres}" />
+                <Grid ColumnDefinitions="*,*">
+                    <Label Text="1 = muy bajo" FontSize="12" />
+                    <Label Grid.Column="1" Text="10 = muy alto" FontSize="12" HorizontalOptions="End" />
+                </Grid>
+
+                <Label Text="{Binding CalidadSueno, StringFormat='Calidad de sueño: {0:F0} / 5'}" FontAttributes="Bold" />
+                <Slider Minimum="1" Maximum="5" Value="{Binding CalidadSueno}" />
+                <Label Text="{Binding DescripcionSueno}" FontSize="12" HorizontalOptions="Center" />
+
+                <Label Text="{Binding EstadoAnimo, StringFormat='Estado de ánimo: {0:F0} / 5'}" FontAttributes="Bold" />
+                <Slider Minimum="1" Maximum="5" Value="{Binding EstadoAnimo}" />
+                <Label Text="{Binding DescripcionAnimo}" FontSize="12" HorizontalOptions="Center" />
+
+                <Label Text="{Binding MinutosActividadFisica, StringFormat='Actividad física: {0:F0} minutos'}" FontAttributes="Bold" />
+                <Stepper Minimum="0" Maximum="600" Increment="10" Value="{Binding MinutosActividadFisica}" HorizontalOptions="Center" />
+
+                <Label Text="{Binding MensajeError}"
+                       TextColor="Red"
+                       IsVisible="{Binding MensajeError, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                <Button Text="Guardar mi día" Command="{Binding GuardarCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+            </VerticalStackLayout>
+
+            <!-- Resumen: si ya registró hoy -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding YaRegistroHoy}">
+                <Label Text="✔ Ya registraste tu día de hoy" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
+                <Label Text="{Binding ResumenHoy}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                <Label Text="Vuelve mañana para tu siguiente registro." FontSize="12" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

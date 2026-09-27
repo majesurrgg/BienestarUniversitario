@@ -14,4 +14,10 @@ public interface IApiService
 
     /// <summary>Llama a un endpoint protegido con el token dado, solo para comprobar que la sesión es válida.</summary>
     Task<bool> VerificarSesionAsync(string token);
+
+    // Check-in diario (Sprint 3). Lanzan SesionExpiradaException si la API responde 401.
+    Task<RegistroDiarioResponse> CrearRegistroDiarioAsync(string token, RegistroDiarioRequest request);
+
+    /// <summary>Check-in de hoy, o null si todavía no lo hizo.</summary>
+    Task<RegistroDiarioResponse?> ObtenerRegistroDiarioDeHoyAsync(string token);
 }
