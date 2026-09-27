@@ -2,6 +2,7 @@
 using BienestarApp.ViewModels;
 using BienestarApp.Views;
 using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 
 namespace BienestarApp;
 
@@ -12,6 +13,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseLocalNotification()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -56,5 +58,6 @@ public static class MauiProgram
 		services.AddSingleton<IAuthService, AuthService>();
 		services.AddSingleton<IRegistroDiarioService, RegistroDiarioService>();
 		services.AddSingleton<IEncuestaBasalService, EncuestaBasalService>();
+		services.AddSingleton<IRecordatorioService, RecordatorioService>();
 	}
 }

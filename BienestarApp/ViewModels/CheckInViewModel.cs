@@ -14,6 +14,7 @@ public partial class CheckInViewModel : BaseViewModel
 {
     private readonly IRegistroDiarioService registroDiarioService;
     private readonly IAuthService authService;
+    private readonly IRecordatorioService recordatorioService;
 
     // Los Slider/Stepper de MAUI trabajan con double; se redondean al
     // moverse y se envían como int (las escalas son enteras).
@@ -41,10 +42,11 @@ public partial class CheckInViewModel : BaseViewModel
     [ObservableProperty]
     private string mensajeError = string.Empty;
 
-    public CheckInViewModel(IRegistroDiarioService registroDiarioService, IAuthService authService)
+    public CheckInViewModel(IRegistroDiarioService registroDiarioService, IAuthService authService, IRecordatorioService recordatorioService)
     {
         this.registroDiarioService = registroDiarioService;
         this.authService = authService;
+        this.recordatorioService = recordatorioService;
         Title = "Mi día";
     }
 
@@ -120,6 +122,12 @@ public partial class CheckInViewModel : BaseViewModel
     private void MostrarResultado(RegistroDiarioResponse? registro)
     {
         YaRegistroHoy = registro is not null;
+
+        // Fire-and-forget: si falla programar/cancelar el recordatorio (ej.
+        // el celular no dio permiso de notificaciones) no debe romper la
+        // pantalla de check-in, que ya cumplió su trabajo principal.
+        _ = recordatorioService.ProgramarSiFaltaAsync(registro is not null);
+
         if (registro is null) return;
 
         ResumenHoy =

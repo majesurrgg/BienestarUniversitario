@@ -14,14 +14,22 @@ public partial class MainViewModel : BaseViewModel
 {
     private readonly IAuthService authService;
     private readonly IApiService apiService;
+    private readonly IRegistroDiarioService registroDiarioService;
+    private readonly IRecordatorioService recordatorioService;
 
     [ObservableProperty]
     private string estadoSesion = string.Empty;
 
-    public MainViewModel(IAuthService authService, IApiService apiService)
+    public MainViewModel(
+        IAuthService authService,
+        IApiService apiService,
+        IRegistroDiarioService registroDiarioService,
+        IRecordatorioService recordatorioService)
     {
         this.authService = authService;
         this.apiService = apiService;
+        this.registroDiarioService = registroDiarioService;
+        this.recordatorioService = recordatorioService;
         Title = "Bienestar Universitario";
     }
 
@@ -47,6 +55,19 @@ public partial class MainViewModel : BaseViewModel
         catch
         {
             EstadoSesion = "No se pudo contactar a la API para verificar la sesión.";
+        }
+
+        // Cada vez que se abre la pantalla principal se reevalúa el
+        // recordatorio de hoy — es el punto de entrada más frecuente de la
+        // app, así que es donde más chance hay de programarlo a tiempo.
+        try
+        {
+            var deHoy = await registroDiarioService.ObtenerDeHoyAsync();
+            await recordatorioService.ProgramarSiFaltaAsync(deHoy is not null);
+        }
+        catch
+        {
+            // No crítico: si falla, CheckInPage lo vuelve a intentar cuando se visite.
         }
     }
 
