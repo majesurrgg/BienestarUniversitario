@@ -97,14 +97,85 @@
                     </VerticalStackLayout>
                 </Grid>
 
-                <!-- ===================== SISCO (placeholder) ===================== -->
-                <Label Text="SISCO — Estrés académico" Style="{StaticResource Headline}" />
-                <Border StrokeShape="RoundRectangle 8" Stroke="Orange" BackgroundColor="#FFF3E0" Padding="12">
-                    <Label TextColor="#8A5300"
-                           Text="Pendiente: aquí van las preguntas reales del inventario SISCO (confirmar versión y escala con tu asesor). Por ahora, ingresa el puntaje ya calculado." />
-                </Border>
-                <Label Text="Puntaje SISCO" FontAttributes="Bold" />
-                <Entry Keyboard="Numeric" Text="{Binding PuntajeSisco}" />
+                <!-- ===================== SISCO SV-21 ===================== -->
+                <Label Text="SISCO SV-21 — Estrés académico" Style="{StaticResource Headline}" />
+                <Label Text="Durante el transcurso de este semestre, ¿has tenido momentos de preocupación o nerviosismo (estrés)?" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding OpcionesSiNo}" SelectedItem="{Binding RespuestaFiltroSisco}" />
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding MostrarPreguntasSisco}">
+
+                    <Label Text="Estresores" Style="{StaticResource SubHeadline}" />
+                    <Label Text="¿Con qué frecuencia te estresa cada uno de estos aspectos?" FontSize="12" />
+                    <CollectionView ItemsSource="{Binding PreguntasEstresores}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="items:PreguntaSiscoItem">
+                                <VerticalStackLayout Spacing="4" Margin="0,8">
+                                    <Label Text="{Binding Texto}" FontAttributes="Bold" />
+                                    <Picker Title="Selecciona una frecuencia" SelectedIndex="{Binding Respuesta}">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>Nunca</x:String>
+                                                <x:String>Casi nunca</x:String>
+                                                <x:String>Rara vez</x:String>
+                                                <x:String>Algunas veces</x:String>
+                                                <x:String>Casi siempre</x:String>
+                                                <x:String>Siempre</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Síntomas" Style="{StaticResource SubHeadline}" />
+                    <Label Text="¿Con qué frecuencia se te presentan estas reacciones cuando estás estresado(a)?" FontSize="12" />
+                    <CollectionView ItemsSource="{Binding PreguntasSintomas}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="items:PreguntaSiscoItem">
+                                <VerticalStackLayout Spacing="4" Margin="0,8">
+                                    <Label Text="{Binding Texto}" FontAttributes="Bold" />
+                                    <Picker Title="Selecciona una frecuencia" SelectedIndex="{Binding Respuesta}">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>Nunca</x:String>
+                                                <x:String>Casi nunca</x:String>
+                                                <x:String>Rara vez</x:String>
+                                                <x:String>Algunas veces</x:String>
+                                                <x:String>Casi siempre</x:String>
+                                                <x:String>Siempre</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Estrategias de afrontamiento" Style="{StaticResource SubHeadline}" />
+                    <Label Text="¿Con qué frecuencia utilizas cada una de estas acciones para enfrentar tu estrés?" FontSize="12" />
+                    <CollectionView ItemsSource="{Binding PreguntasEstrategias}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="items:PreguntaSiscoItem">
+                                <VerticalStackLayout Spacing="4" Margin="0,8">
+                                    <Label Text="{Binding Texto}" FontAttributes="Bold" />
+                                    <Picker Title="Selecciona una frecuencia" SelectedIndex="{Binding Respuesta}">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>Nunca</x:String>
+                                                <x:String>Casi nunca</x:String>
+                                                <x:String>Rara vez</x:String>
+                                                <x:String>Algunas veces</x:String>
+                                                <x:String>Casi siempre</x:String>
+                                                <x:String>Siempre</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
 
                 <Button Text="Enviar encuesta" Command="{Binding EnviarCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
