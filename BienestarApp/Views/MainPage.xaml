@@ -41,6 +41,7 @@
                     SemanticProperties.HeadingLevel="Level2" />
 
                 <Button Text="Registrar mi día" Command="{Binding IrACheckInCommand}" />
+                <Button Text="Mi progreso" Command="{Binding IrAProgresoCommand}" />
                 <Button Text="Encuesta basal" Command="{Binding IrAEncuestaBasalCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
             </VerticalStackLayout>
 

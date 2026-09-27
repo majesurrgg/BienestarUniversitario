@@ -9,4 +9,7 @@ public interface IRegistroDiarioService
 
     /// <summary>Devuelve el check-in de hoy del usuario, o null si todavía no lo hizo.</summary>
     Task<RegistroDiarioResponse?> ObtenerDeHoyAsync(int usuarioId);
+
+    /// <summary>Últimos check-ins del usuario, más reciente primero (para la pantalla "Mi progreso").</summary>
+    Task<List<RegistroDiarioResponse>> ObtenerHistorialAsync(int usuarioId, int dias);
 }

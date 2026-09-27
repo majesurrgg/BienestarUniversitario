@@ -51,6 +51,16 @@ public class ApiService(HttpClient http) : IApiService
         return await response.Content.ReadFromJsonAsync<RegistroDiarioResponse>();
     }
 
+    public async Task<List<RegistroDiarioResponse>> ObtenerHistorialRegistroDiarioAsync(string token, int dias)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Get, $"api/registrosdiarios/historial?dias={dias}");
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<List<RegistroDiarioResponse>>())!;
+    }
+
     public async Task<EncuestaBasalResponse> CrearEncuestaBasalAsync(string token, EncuestaBasalRequest request)
     {
         using var mensaje = new HttpRequestMessage(HttpMethod.Post, "api/encuestasbasal")

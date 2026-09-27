@@ -13,4 +13,7 @@ public interface IRegistroDiarioService
 
     /// <summary>Check-in de hoy, o null si todavía no lo hizo.</summary>
     Task<RegistroDiarioResponse?> ObtenerDeHoyAsync();
+
+    /// <summary>Historial de los últimos <paramref name="dias"/> días, para "Mi progreso".</summary>
+    Task<List<RegistroDiarioResponse>> ObtenerHistorialAsync(int dias = 7);
 }

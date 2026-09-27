@@ -40,6 +40,7 @@ public static class MauiProgram
 		services.AddTransient<MainPage>();
 		services.AddTransient<Views.CheckInPage>();
 		services.AddTransient<Views.EncuestaBasalPage>();
+		services.AddTransient<Views.ProgresoPage>();
 
 		// ViewModels
 		services.AddTransient<LoginViewModel>();
@@ -47,6 +48,7 @@ public static class MauiProgram
 		services.AddTransient<MainViewModel>();
 		services.AddTransient<CheckInViewModel>();
 		services.AddTransient<EncuestaBasalViewModel>();
+		services.AddTransient<ProgresoViewModel>();
 
 		// Services: HttpClient tipado hacia BienestarApi + servicios propios.
 		// Singleton porque no guardan estado por pantalla (la sesión vive en

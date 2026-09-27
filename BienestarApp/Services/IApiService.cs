@@ -21,6 +21,9 @@ public interface IApiService
     /// <summary>Check-in de hoy, o null si todavía no lo hizo.</summary>
     Task<RegistroDiarioResponse?> ObtenerRegistroDiarioDeHoyAsync(string token);
 
+    /// <summary>Historial de check-ins de los últimos <paramref name="dias"/> días, más reciente primero.</summary>
+    Task<List<RegistroDiarioResponse>> ObtenerHistorialRegistroDiarioAsync(string token, int dias);
+
     /// <summary>Encuesta basal (Sprint 3). Lanza SesionExpiradaException si la API responde 401.</summary>
     Task<EncuestaBasalResponse> CrearEncuestaBasalAsync(string token, EncuestaBasalRequest request);
 

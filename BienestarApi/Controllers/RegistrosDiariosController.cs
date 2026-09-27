@@ -37,5 +37,10 @@ public class RegistrosDiariosController(IRegistroDiarioService registroDiarioSer
         return registro is null ? NoContent() : Ok(registro);
     }
 
+    /// <summary>Historial de check-ins (por defecto, últimos 7 días) — para la pantalla "Mi progreso".</summary>
+    [HttpGet("historial")]
+    public async Task<ActionResult<List<RegistroDiarioResponse>>> ObtenerHistorial([FromQuery] int dias = 7) =>
+        Ok(await registroDiarioService.ObtenerHistorialAsync(UsuarioIdDelToken(), dias));
+
     private int UsuarioIdDelToken() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

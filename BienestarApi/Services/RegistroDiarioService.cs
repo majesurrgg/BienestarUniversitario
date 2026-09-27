@@ -99,6 +99,19 @@ public class RegistroDiarioService(BienestarDbContext db, IConfiguration configu
         return tiempo;
     }
 
+    public async Task<List<RegistroDiarioResponse>> ObtenerHistorialAsync(int usuarioId, int dias)
+    {
+        var desde = FechaDeHoy().AddDays(-dias);
+
+        var registros = await db.RegistrosDiarios
+            .Include(r => r.Tiempo)
+            .Where(r => r.UsuarioId == usuarioId && r.Tiempo.Fecha >= desde)
+            .OrderByDescending(r => r.Tiempo.Fecha)
+            .ToListAsync();
+
+        return [.. registros.Select(r => ARespuesta(r, r.Tiempo.Fecha))];
+    }
+
     private static RegistroDiarioResponse ARespuesta(RegistroDiario registro, DateOnly fecha) => new()
     {
         Id = registro.Id,
