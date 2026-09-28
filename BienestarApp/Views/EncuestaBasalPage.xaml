@@ -31,7 +31,17 @@
                 <Label Grid.Column="0" Text="{Binding TextoPaso}" FontAttributes="Bold" VerticalOptions="Center" />
                 <Label Grid.Column="1" Text="{Binding FaseActualTexto}" FontSize="12" TextColor="Gray" VerticalOptions="Center" />
             </Grid>
-            <ProgressBar Progress="{Binding Progreso}" ProgressColor="{StaticResource Primary}" />
+            <!-- Barra de progreso propia: el ProgressBar nativo de Android
+                 se ve como un rectángulo grueso sin redondear. Esto es un
+                 "riel" gris de fondo con una barra turquesa encima que se
+                 escala desde la izquierda según el paso (0 a 1). -->
+            <Grid HeightRequest="8">
+                <BoxView Color="{AppThemeBinding Light=#D8D5CB, Dark=#33383A}" CornerRadius="4"
+                         HorizontalOptions="Fill" VerticalOptions="Fill" />
+                <BoxView Color="{StaticResource Primary}" CornerRadius="4"
+                         HorizontalOptions="Fill" VerticalOptions="Fill"
+                         AnchorX="0" ScaleX="{Binding Progreso}" />
+            </Grid>
             <Label x:Name="IconoTextoLabel" Text="{Binding IconoPaso}" FontSize="40" HorizontalOptions="Center" />
             <Label Text="{Binding TituloPaso}" Style="{StaticResource SubHeadline}" />
         </VerticalStackLayout>
