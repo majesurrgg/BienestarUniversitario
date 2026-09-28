@@ -9,6 +9,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="16" VerticalOptions="Center">
 
+            <Image Source="logo_bienestar.svg" HeightRequest="72" WidthRequest="72" HorizontalOptions="Center" Margin="0,0,0,8" />
             <Label Text="Bienestar Universitario" Style="{StaticResource Headline}" HorizontalOptions="Center" />
             <Label Text="Inicia sesión para continuar" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
 

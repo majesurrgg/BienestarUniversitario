@@ -20,11 +20,17 @@ public partial class MainViewModel : BaseViewModel
     private readonly IRecordatorioService recordatorioService;
 
     [ObservableProperty]
-    private string estadoSesion = string.Empty;
+    private string subtitulo = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PuedeHacerCheckIn))]
     private bool encuestaBasalCompletada;
+
+    [ObservableProperty]
+    private bool yaHizoCheckInHoy;
+
+    [ObservableProperty]
+    private int rachaDias;
 
     [ObservableProperty]
     private string estadoRecordatorio = string.Empty;
@@ -50,35 +56,48 @@ public partial class MainViewModel : BaseViewModel
     {
         var nombre = await authService.ObtenerNombreAsync();
         Title = string.IsNullOrEmpty(nombre) ? "Bienestar Universitario" : $"Hola, {nombre}";
+        Subtitulo = Saludo();
 
         var token = await authService.ObtenerTokenAsync();
-        if (string.IsNullOrEmpty(token))
-        {
-            EstadoSesion = "Sin sesión activa.";
-            return;
-        }
+        if (string.IsNullOrEmpty(token)) return;
 
+        // Verificación silenciosa de la sesión: si el token ya no es
+        // válido, hay que sacarlo de la app en vez de dejarlo ver botones
+        // que van a fallar apenas los toque. No se le muestra nada de esto
+        // al estudiante si todo está bien — no le importa cómo funciona
+        // JWT por dentro.
         try
         {
             var valido = await apiService.VerificarSesionAsync(token);
-            EstadoSesion = valido
-                ? "Sesión verificada contra la API (endpoint protegido con JWT)."
-                : "El token guardado ya no es válido.";
+            if (!valido)
+            {
+                await VolverAlLoginAsync();
+                return;
+            }
         }
         catch
         {
-            EstadoSesion = "No se pudo contactar a la API para verificar la sesión.";
+            // Sin conexión: se deja seguir con lo que ya está en el celular
+            // (SecureStorage), no se corta la sesión por un problema de red.
         }
 
+        List<RegistroDiarioResponse> historial = [];
         try
         {
             var fases = await encuestaBasalService.ObtenerFasesCompletadasAsync();
             EncuestaBasalCompletada = fases.Contains(FaseEncuesta.Basal);
+
+            if (EncuestaBasalCompletada)
+                historial = await registroDiarioService.ObtenerHistorialAsync(7);
         }
         catch
         {
             EncuestaBasalCompletada = false;
         }
+
+        var hoy = DateOnly.FromDateTime(DateTime.Now);
+        YaHizoCheckInHoy = historial.Any(r => r.Fecha == hoy);
+        RachaDias = CalculadorRacha.Calcular([.. historial.Select(r => r.Fecha)]);
 
         // Cada vez que se abre la pantalla principal se reevalúa el
         // recordatorio de hoy — es el punto de entrada más frecuente de la
@@ -88,13 +107,23 @@ public partial class MainViewModel : BaseViewModel
         // depender del celular sonando en el momento exacto de probar.
         try
         {
-            var deHoy = EncuestaBasalCompletada ? await registroDiarioService.ObtenerDeHoyAsync() : null;
-            EstadoRecordatorio = await recordatorioService.ProgramarSiFaltaAsync(deHoy is not null);
+            EstadoRecordatorio = await recordatorioService.ProgramarSiFaltaAsync(YaHizoCheckInHoy);
         }
         catch (Exception ex)
         {
             EstadoRecordatorio = $"No se pudo evaluar el recordatorio: {ex.Message}";
         }
+    }
+
+    private static string Saludo()
+    {
+        var hora = DateTime.Now.Hour;
+        return hora switch
+        {
+            >= 5 and < 12 => "Buenos días. Un minuto para revisar cómo estás hoy.",
+            >= 12 and < 19 => "Buenas tardes. Un minuto para revisar cómo estás hoy.",
+            _ => "Buenas noches. Un minuto para revisar cómo estuvo tu día.",
+        };
     }
 
     [RelayCommand]
@@ -107,7 +136,9 @@ public partial class MainViewModel : BaseViewModel
     private static async Task IrAEncuestaBasalAsync() => await Shell.Current.GoToAsync(nameof(Views.EncuestaBasalPage));
 
     [RelayCommand]
-    private async Task CerrarSesionAsync()
+    private async Task CerrarSesionAsync() => await VolverAlLoginAsync();
+
+    private async Task VolverAlLoginAsync()
     {
         await authService.CerrarSesionAsync();
         await Shell.Current.GoToAsync("//LoginPage");

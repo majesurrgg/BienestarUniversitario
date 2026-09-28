@@ -11,10 +11,12 @@
             Padding="30,20"
             Spacing="20">
 
+            <Image Source="logo_bienestar.svg" HeightRequest="56" WidthRequest="56" HorizontalOptions="Center" />
             <Label
                 Text="{Binding Title}"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
+            <Label Text="{Binding Subtitulo}" Style="{StaticResource SubHeadline}" FontSize="14" />
 
             <!-- Paso 1, obligatorio: encuesta basal. Se muestra como el
                  paso activo mientras no esté completada, y bloquea el
@@ -34,11 +36,18 @@
 
             <!-- Paso 2: check-in diario, habilitado solo tras la basal. -->
             <VerticalStackLayout Spacing="10" IsVisible="{Binding PuedeHacerCheckIn}">
-                <Label
-                    Text="{Binding EstadoSesion}"
-                    Style="{StaticResource SubHeadline}"
-                    FontSize="14"
-                    SemanticProperties.HeadingLevel="Level2" />
+
+                <!-- Vista previa de la racha: le da al estudiante una razón
+                     para abrir la app además de "tengo que llenar algo". -->
+                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource Primary}" Padding="14"
+                        IsVisible="{Binding YaHizoCheckInHoy, Converter={StaticResource InvertedBoolConverter}}">
+                    <Label Text="{Binding RachaDias, StringFormat='🔥 Llevas {0} días seguidos. ¡No cortes la racha hoy!'}"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="13" />
+                </Border>
+                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource Primary}" Padding="14"
+                        IsVisible="{Binding YaHizoCheckInHoy}">
+                    <Label Text="✔ Ya registraste tu día de hoy." HorizontalOptions="Center" FontSize="13" />
+                </Border>
 
                 <Button Text="Registrar mi día" Command="{Binding IrACheckInCommand}" />
                 <Button Text="Mi progreso" Command="{Binding IrAProgresoCommand}" />
