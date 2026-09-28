@@ -54,11 +54,6 @@
                 <Button Text="Encuesta basal" Command="{Binding IrAEncuestaBasalCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
             </VerticalStackLayout>
 
-            <!-- Diagnóstico del recordatorio (Sprint 4, quitar cuando esté
-                 validado): confirma en pantalla si quedó programado, sin
-                 depender de esperar a que suene. -->
-            <Label Text="{Binding EstadoRecordatorio}" FontSize="11" TextColor="Gray" />
-
             <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
         </VerticalStackLayout>
     </ScrollView>

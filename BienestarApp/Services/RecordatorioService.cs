@@ -19,7 +19,7 @@ namespace BienestarApp.Services;
 public class RecordatorioService : IRecordatorioService
 {
     private const int NotificationId = 5001;
-    private const int HoraRecordatorio = 17; // hora local del celular. TODO: volver a 20 (8pm) después de probar.
+    private const int HoraRecordatorio = 20; // 8:00 p. m., hora local del celular. Confirmado: llega correctamente.
 
     public async Task<string> ProgramarSiFaltaAsync(bool yaHizoCheckInHoy)
     {
