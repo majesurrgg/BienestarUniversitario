@@ -12,7 +12,7 @@ namespace BienestarApi.Services;
 /// estudiante por día (que además está garantizada por el índice único
 /// (UsuarioId, TiempoId) en la base).
 /// </summary>
-public class RegistroDiarioService(BienestarDbContext db, IConfiguration configuration) : IRegistroDiarioService
+public class RegistroDiarioService(BienestarDbContext db, IRelojPiloto reloj) : IRegistroDiarioService
 {
     public async Task<RegistroDiarioResponse> CrearAsync(int usuarioId, CrearRegistroDiarioRequest request)
     {
@@ -62,17 +62,8 @@ public class RegistroDiarioService(BienestarDbContext db, IConfiguration configu
         return registro is null ? null : ARespuesta(registro, hoy);
     }
 
-    /// <summary>
-    /// "Hoy" según la zona horaria del estudio (Perú), no la del servidor ni
-    /// UTC: a las 9 p. m. en Lima ya es el día siguiente en UTC, y el
-    /// check-in quedaría en la fecha equivocada.
-    /// </summary>
-    private DateOnly FechaDeHoy()
-    {
-        var zonaId = configuration["ZonaHoraria"] ?? "America/Lima";
-        var zona = TimeZoneInfo.FindSystemTimeZoneById(zonaId);
-        return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zona));
-    }
+    /// <summary>"Hoy" en la zona horaria del estudio (ver <see cref="RelojPiloto"/>).</summary>
+    private DateOnly FechaDeHoy() => reloj.Hoy();
 
     /// <summary>
     /// La dimensión Tiempo se llena "a demanda": la primera vez que alguien

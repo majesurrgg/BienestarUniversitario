@@ -16,6 +16,30 @@
             <Entry Placeholder="Carrera" Text="{Binding Carrera}" />
             <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
             <Entry Placeholder="Contraseña (mínimo 8 caracteres)" IsPassword="True" Text="{Binding Password}" />
+            <Entry Placeholder="Código de invitación" Text="{Binding CodigoInvitacion}" />
+
+            <!-- Consentimiento informado: obligatorio (Ley 29733, datos de salud).
+                 La API también lo exige y guarda cuándo y qué versión se aceptó. -->
+            <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource Primary}" Padding="14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Antes de participar, lee el consentimiento informado: qué datos se recogen, cómo se protegen y que puedes retirarte cuando quieras."
+                           FontSize="13" />
+                    <Button Text="Leer consentimiento informado"
+                            Command="{Binding VerConsentimientoCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Primary}"
+                            HorizontalOptions="Start"
+                            Padding="0" />
+                    <HorizontalStackLayout Spacing="6">
+                        <CheckBox IsChecked="{Binding AceptaConsentimiento}" Color="{StaticResource Primary}" VerticalOptions="Center" />
+                        <Label Text="Soy mayor de 18 años, leí el consentimiento y acepto participar"
+                               FontSize="13"
+                               VerticalOptions="Center"
+                               LineBreakMode="WordWrap"
+                               MaximumWidthRequest="240" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
 
             <Label Text="{Binding MensajeError}"
                    TextColor="Red"

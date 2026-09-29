@@ -10,4 +10,7 @@ public interface IEncuestaBasalService
 
     /// <summary>Fases (Basal/Final) que el usuario ya completó — para que la app no deje reenviar una fase ya hecha.</summary>
     Task<List<FaseEncuesta>> ObtenerFasesCompletadasAsync(int usuarioId);
+
+    /// <summary>Fases completadas + desde cuándo se habilita la final (ver <see cref="EstadoEncuestasResponse"/>).</summary>
+    Task<EstadoEncuestasResponse> ObtenerEstadoAsync(int usuarioId);
 }

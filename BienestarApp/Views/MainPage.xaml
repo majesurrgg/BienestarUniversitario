@@ -18,6 +18,36 @@
                 SemanticProperties.HeadingLevel="Level1" />
             <Label Text="{Binding Subtitulo}" Style="{StaticResource SubHeadline}" FontSize="14" />
 
+            <Label Text="{Binding MensajeConexion}"
+                   TextColor="Red" FontSize="13" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding MensajeConexion, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <!-- Cierre del piloto: aparecen solo cuando corresponde (la fecha
+                 de la encuesta final la decide la API). -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{StaticResource Primary}"
+                    BackgroundColor="{AppThemeBinding Light=#EAF3F2, Dark=#1C2023}"
+                    Padding="18"
+                    IsVisible="{Binding EncuestaFinalDisponible}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Cierre del piloto · Encuesta final" FontAttributes="Bold" />
+                    <Label Text="¡Llegaste al final de las 4 semanas! Responde otra vez la encuesta inicial para comparar cómo estabas al empezar y cómo estás ahora." FontSize="13" />
+                    <Button Text="Responder encuesta de cierre" Command="{Binding IrAEncuestaBasalCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{StaticResource Primary}"
+                    BackgroundColor="{AppThemeBinding Light=#EAF3F2, Dark=#1C2023}"
+                    Padding="18"
+                    IsVisible="{Binding SusDisponible}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Último paso · Evalúa la app" FontAttributes="Bold" />
+                    <Label Text="10 afirmaciones rápidas sobre qué tan fácil fue usar la app, y dos preguntas opcionales." FontSize="13" />
+                    <Button Text="Evaluar la app" Command="{Binding IrAEncuestaSusCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Paso 1, obligatorio: encuesta basal. Se muestra como el
                  paso activo mientras no esté completada, y bloquea el
                  check-in — no tiene sentido medir el día a día sin la
@@ -51,7 +81,6 @@
 
                 <Button Text="Registrar mi día" Command="{Binding IrACheckInCommand}" />
                 <Button Text="Mi progreso" Command="{Binding IrAProgresoCommand}" />
-                <Button Text="Encuesta basal" Command="{Binding IrAEncuestaBasalCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
             </VerticalStackLayout>
 
             <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />

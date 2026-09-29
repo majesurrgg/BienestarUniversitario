@@ -35,5 +35,10 @@ public class EncuestasBasalController(IEncuestaBasalService encuestaBasalService
     public async Task<ActionResult<List<FaseEncuesta>>> ObtenerFasesCompletadas() =>
         Ok(await encuestaBasalService.ObtenerFasesCompletadasAsync(UsuarioIdDelToken()));
 
+    /// <summary>Fases completadas + si la encuesta final ya está disponible y desde qué fecha.</summary>
+    [HttpGet("estado")]
+    public async Task<ActionResult<EstadoEncuestasResponse>> ObtenerEstado() =>
+        Ok(await encuestaBasalService.ObtenerEstadoAsync(UsuarioIdDelToken()));
+
     private int UsuarioIdDelToken() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

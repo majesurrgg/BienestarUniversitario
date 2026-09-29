@@ -4,6 +4,7 @@ using BienestarApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BienestarApi.Data.Migrations
 {
     [DbContext(typeof(BienestarDbContext))]
-    partial class BienestarDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260928231510_AgregaConsentimientoYSusDetalle")]
+    partial class AgregaConsentimientoYSusDetalle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

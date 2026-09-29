@@ -1,5 +1,7 @@
+#if DEBUG
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+#endif
 
 namespace BienestarApp.Services;
 
@@ -23,12 +25,16 @@ namespace BienestarApp.Services;
 /// Se usa HTTP (no HTTPS) en desarrollo para no lidiar con certificados
 /// autofirmados sin confianza en el emulador/celular; Android lo permite
 /// solo para estos hosts (ver Platforms/Android/Resources/xml/
-/// network_security_config.xml). Sprint 4: revisar si el piloto necesita
-/// HTTPS real.
+/// network_security_config.xml).
+///
+/// Todo lo anterior es solo para DEBUG (probar desde Visual Studio). En
+/// RELEASE (el APK que se reparte a los participantes del piloto) se usa
+/// siempre la API publicada en Azure, por HTTPS.
 /// (.NET MAUI, solo Android)
 /// </summary>
 public static class ApiConfig
 {
+#if DEBUG
     private const string UrlEmulador = "http://10.0.2.2:5178/"; // alias fijo del emulador Android hacia el localhost de la PC anfitriona.
     private const string UrlCelularUsb = "http://localhost:5178/"; // dirección para el celular conectado por USB.
     private const string UrlZonaMovilPc = "http://192.168.137.1:5178/"; // la PC dentro de su propia zona móvil.
@@ -60,4 +66,12 @@ public static class ApiConfig
             return false;
         }
     }
+#else
+    // API publicada en Azure App Service (ver página "Despliegue en la nube"
+    // en Notion). No es un secreto: cualquiera que instale el APK puede verla;
+    // lo que la protege es el JWT de cada endpoint.
+    private const string UrlProduccion = "https://bienestar-api-2026-b3hndpb7aja7gxer.westus2-01.azurewebsites.net/";
+
+    public static string BaseUrl => UrlProduccion;
+#endif
 }

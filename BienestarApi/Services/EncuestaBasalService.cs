@@ -7,14 +7,18 @@ using Microsoft.EntityFrameworkCore;
 namespace BienestarApi.Services;
 
 /// <summary>
-/// Guarda la encuesta basal y, si el ítem 9 del PHQ-9 dio positivo, crea de
-/// inmediato una <see cref="AlertaRiesgo"/> — el protocolo ético para ese
-/// ítem. El umbral (cualquier respuesta &gt; 0) es deliberadamente
+/// Guarda la encuesta basal y, si el ítem 9 del PHQ-9 dio positivo, crea en
+/// la MISMA operación una <see cref="AlertaRiesgo"/> — el protocolo ético
+/// para ese ítem. El umbral (cualquier respuesta &gt; 0) es deliberadamente
 /// conservador: para un ítem de riesgo de autolesión es preferible marcar
 /// de más que dejar pasar un caso. Validar con el asesor/comité de ética
 /// antes del piloto real.
+///
+/// También aplica el orden del diseño pre-post: la fase Final exige la
+/// Basal y no se habilita antes de "Piloto:FechaHabilitaEncuestaFinal"
+/// (configurable en Azure sin volver a publicar ni generar otro APK).
 /// </summary>
-public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
+public class EncuestaBasalService(BienestarDbContext db, IConfiguration configuration, IRelojPiloto reloj) : IEncuestaBasalService
 {
     private const int UmbralAlertaItem9 = 1;
 
@@ -23,10 +27,19 @@ public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
         if (request.RespuestasPhq9.Count != 9 || request.RespuestasPhq9.Any(r => r is < 0 or > 3))
             throw new EncuestaBasalException("El PHQ-9 debe traer exactamente 9 respuestas, cada una entre 0 y 3.");
 
-        var yaExiste = await db.EncuestasBasal
-            .AnyAsync(e => e.UsuarioId == usuarioId && e.Fase == request.Fase);
-        if (yaExiste)
+        var fasesHechas = await ObtenerFasesCompletadasAsync(usuarioId);
+        if (fasesHechas.Contains(request.Fase))
             throw new EncuestaBasalException($"Ya existe una encuesta registrada para la fase {request.Fase}.");
+
+        if (request.Fase == FaseEncuesta.Final)
+        {
+            if (!fasesHechas.Contains(FaseEncuesta.Basal))
+                throw new EncuestaBasalException("Primero debes completar la encuesta inicial.");
+
+            var fechaHabilita = FechaHabilitaFinal();
+            if (fechaHabilita is not null && reloj.Hoy() < fechaHabilita)
+                throw new EncuestaBasalException($"La encuesta de cierre se habilita el {fechaHabilita:dd/MM/yyyy}.");
+        }
 
         var respuestaItem9 = request.RespuestasPhq9[8];
         var puntajePhq9 = request.RespuestasPhq9.Sum();
@@ -43,6 +56,27 @@ public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
         };
         db.EncuestasBasal.Add(encuesta);
 
+        var requiereAtencion = respuestaItem9 >= UmbralAlertaItem9;
+        if (requiereAtencion)
+        {
+            // Se enlaza por navegación (no por Id) para que EF Core guarde la
+            // encuesta y su alerta en un solo SaveChanges, dentro de una
+            // transacción: o quedan las dos, o ninguna. Antes eran dos
+            // guardados separados y una caída de conexión entre ambos dejaba
+            // una encuesta con ítem 9 positivo SIN alerta registrada.
+            db.AlertasRiesgo.Add(new AlertaRiesgo
+            {
+                UsuarioId = usuarioId,
+                EncuestaBasal = encuesta,
+                Fecha = DateTime.UtcNow,
+                // true porque el mensaje se muestra en el mismo momento en
+                // que la app recibe RequiereAtencionInmediata = true. Si
+                // algún día ese aviso deja de ser automático, este campo
+                // debe reflejar si REALMENTE se mostró.
+                SeMostroMensajeAyuda = true,
+            });
+        }
+
         try
         {
             await db.SaveChangesAsync();
@@ -53,23 +87,6 @@ public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
             // simultáneos pasan ambos el chequeo de arriba; el índice único
             // (UsuarioId, Fase) de la base frena al segundo.
             throw new EncuestaBasalException($"Ya existe una encuesta registrada para la fase {request.Fase}.");
-        }
-
-        var requiereAtencion = respuestaItem9 >= UmbralAlertaItem9;
-        if (requiereAtencion)
-        {
-            db.AlertasRiesgo.Add(new AlertaRiesgo
-            {
-                UsuarioId = usuarioId,
-                EncuestaBasalId = encuesta.Id,
-                Fecha = DateTime.UtcNow,
-                // true porque el mensaje se muestra en el mismo momento en
-                // que la app recibe RequiereAtencionInmediata = true. Si
-                // algún día ese aviso deja de ser automático, este campo
-                // debe reflejar si REALMENTE se mostró.
-                SeMostroMensajeAyuda = true,
-            });
-            await db.SaveChangesAsync();
         }
 
         return new EncuestaBasalResponse
@@ -89,4 +106,31 @@ public class EncuestaBasalService(BienestarDbContext db) : IEncuestaBasalService
             .Where(e => e.UsuarioId == usuarioId)
             .Select(e => e.Fase)
             .ToListAsync();
+
+    public async Task<EstadoEncuestasResponse> ObtenerEstadoAsync(int usuarioId)
+    {
+        var fases = await ObtenerFasesCompletadasAsync(usuarioId);
+        var basal = fases.Contains(FaseEncuesta.Basal);
+        var final = fases.Contains(FaseEncuesta.Final);
+        var fechaHabilita = FechaHabilitaFinal();
+        var sus = final && await db.EncuestasSUS.AnyAsync(e => e.UsuarioId == usuarioId);
+
+        return new EstadoEncuestasResponse
+        {
+            BasalCompletada = basal,
+            FinalCompletada = final,
+            FechaHabilitaFinal = fechaHabilita,
+            FinalDisponible = basal && !final && (fechaHabilita is null || reloj.Hoy() >= fechaHabilita),
+            SusCompletada = sus,
+            SusDisponible = final && !sus,
+        };
+    }
+
+    /// <summary>
+    /// Fecha (hora de Perú) desde la que se acepta la encuesta final. Se
+    /// configura en "Piloto:FechaHabilitaEncuestaFinal" (formato AAAA-MM-DD);
+    /// vacío = sin restricción, útil para probar en desarrollo.
+    /// </summary>
+    private DateOnly? FechaHabilitaFinal() =>
+        DateOnly.TryParse(configuration["Piloto:FechaHabilitaEncuestaFinal"], out var fecha) ? fecha : null;
 }

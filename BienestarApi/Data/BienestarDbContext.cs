@@ -97,6 +97,12 @@ public class BienestarDbContext : DbContext
         modelBuilder.Entity<EncuestaSUS>(entity =>
         {
             entity.Property(e => e.PuntajeSUS).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.RespuestasSUS).HasMaxLength(40);
+            entity.Property(e => e.ComentarioLoMasUtil).HasMaxLength(1000);
+            entity.Property(e => e.ComentarioMejoras).HasMaxLength(1000);
+
+            // La SUS se aplica una sola vez por estudiante, al cierre.
+            entity.HasIndex(e => e.UsuarioId).IsUnique();
 
             entity.HasOne(e => e.Usuario)
                   .WithMany(u => u.EncuestasSUS)

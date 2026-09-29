@@ -9,14 +9,18 @@ namespace BienestarApp.ViewModels;
 /// Pantalla principal tras el login. Decide el orden obligatorio del
 /// estudio: la encuesta basal (fase Basal) se completa una sola vez, antes
 /// de que se habilite el check-in diario — no tiene sentido medir el "día a
-/// día" sin la línea base con la que se va a comparar.
+/// día" sin la línea base con la que se va a comparar. Al cierre del
+/// piloto muestra la encuesta final y, después, la evaluación de la app (SUS).
+///
+/// Es la pantalla que más se abre (se vuelve a ella desde todas las demás),
+/// así que NO consulta la API cada vez que aparece: usa
+/// <see cref="ISincronizacionService"/>, que consulta como mucho una vez al
+/// día — cada consulta despierta la base de Azure y consume el cupo gratuito.
 /// </summary>
 public partial class MainViewModel : BaseViewModel
 {
     private readonly IAuthService authService;
-    private readonly IApiService apiService;
-    private readonly IRegistroDiarioService registroDiarioService;
-    private readonly IEncuestaBasalService encuestaBasalService;
+    private readonly ISincronizacionService sincronizacion;
     private readonly IRecordatorioService recordatorioService;
 
     [ObservableProperty]
@@ -33,21 +37,23 @@ public partial class MainViewModel : BaseViewModel
     private int rachaDias;
 
     [ObservableProperty]
+    private bool encuestaFinalDisponible;
+
+    [ObservableProperty]
+    private bool susDisponible;
+
+    [ObservableProperty]
+    private string mensajeConexion = string.Empty;
+
+    [ObservableProperty]
     private string estadoRecordatorio = string.Empty;
 
     public bool PuedeHacerCheckIn => EncuestaBasalCompletada;
 
-    public MainViewModel(
-        IAuthService authService,
-        IApiService apiService,
-        IRegistroDiarioService registroDiarioService,
-        IEncuestaBasalService encuestaBasalService,
-        IRecordatorioService recordatorioService)
+    public MainViewModel(IAuthService authService, ISincronizacionService sincronizacion, IRecordatorioService recordatorioService)
     {
         this.authService = authService;
-        this.apiService = apiService;
-        this.registroDiarioService = registroDiarioService;
-        this.encuestaBasalService = encuestaBasalService;
+        this.sincronizacion = sincronizacion;
         this.recordatorioService = recordatorioService;
         Title = "Bienestar Universitario";
     }
@@ -58,53 +64,43 @@ public partial class MainViewModel : BaseViewModel
         Title = string.IsNullOrEmpty(nombre) ? "Bienestar Universitario" : $"Hola, {nombre}";
         Subtitulo = Saludo();
 
-        var token = await authService.ObtenerTokenAsync();
-        if (string.IsNullOrEmpty(token)) return;
+        // La sesión se revisa en el celular (fecha de vencimiento del token),
+        // sin llamar a la API.
+        if (!await authService.HaySesionActivaAsync())
+        {
+            await VolverAlLoginAsync();
+            return;
+        }
 
-        // Verificación silenciosa de la sesión: si el token ya no es
-        // válido, hay que sacarlo de la app en vez de dejarlo ver botones
-        // que van a fallar apenas los toque. No se le muestra nada de esto
-        // al estudiante si todo está bien — no le importa cómo funciona
-        // JWT por dentro.
+        DatosLocales datos;
         try
         {
-            var valido = await apiService.VerificarSesionAsync(token);
-            if (!valido)
-            {
-                await VolverAlLoginAsync();
-                return;
-            }
+            datos = await sincronizacion.ObtenerAsync();
+            MensajeConexion = string.Empty;
+        }
+        catch (SesionExpiradaException)
+        {
+            await VolverAlLoginAsync();
+            return;
         }
         catch
         {
-            // Sin conexión: se deja seguir con lo que ya está en el celular
-            // (SecureStorage), no se corta la sesión por un problema de red.
-        }
-
-        List<RegistroDiarioResponse> historial = [];
-        try
-        {
-            var fases = await encuestaBasalService.ObtenerFasesCompletadasAsync();
-            EncuestaBasalCompletada = fases.Contains(FaseEncuesta.Basal);
-
-            if (EncuestaBasalCompletada)
-                historial = await registroDiarioService.ObtenerHistorialAsync(7);
-        }
-        catch
-        {
-            EncuestaBasalCompletada = false;
+            // Sin conexión: se sigue con lo último que se sabía.
+            datos = sincronizacion.Actual;
+            MensajeConexion = datos.UltimaSincronizacion is null
+                ? "No se pudo conectar con el servidor. Revisa tu internet y vuelve a abrir la app."
+                : string.Empty;
         }
 
         var hoy = DateOnly.FromDateTime(DateTime.Now);
-        YaHizoCheckInHoy = historial.Any(r => r.Fecha == hoy);
-        RachaDias = CalculadorRacha.Calcular([.. historial.Select(r => r.Fecha)]);
+        EncuestaBasalCompletada = datos.BasalCompletada;
+        YaHizoCheckInHoy = datos.CheckInDe(hoy) is not null;
+        RachaDias = CalculadorRacha.Calcular([.. datos.Historial.Select(r => r.Fecha)]);
+        EncuestaFinalDisponible = datos.FinalDisponible(hoy);
+        SusDisponible = datos.SusDisponible;
 
         // Cada vez que se abre la pantalla principal se reevalúa el
-        // recordatorio de hoy — es el punto de entrada más frecuente de la
-        // app, así que es donde más chance hay de programarlo a tiempo. El
-        // texto que devuelve es de diagnóstico (Sprint 4, quitar en Sprint
-        // final): sirve para confirmar en pantalla si quedó programado, sin
-        // depender del celular sonando en el momento exacto de probar.
+        // recordatorio de hoy (no consulta la API: usa YaHizoCheckInHoy).
         try
         {
             EstadoRecordatorio = await recordatorioService.ProgramarSiFaltaAsync(YaHizoCheckInHoy);
@@ -134,6 +130,9 @@ public partial class MainViewModel : BaseViewModel
 
     [RelayCommand]
     private static async Task IrAEncuestaBasalAsync() => await Shell.Current.GoToAsync(nameof(Views.EncuestaBasalPage));
+
+    [RelayCommand]
+    private static async Task IrAEncuestaSusAsync() => await Shell.Current.GoToAsync(nameof(Views.EncuestaSusPage));
 
     [RelayCommand]
     private async Task CerrarSesionAsync() => await VolverAlLoginAsync();

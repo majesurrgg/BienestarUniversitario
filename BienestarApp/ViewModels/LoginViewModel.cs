@@ -24,6 +24,17 @@ public partial class LoginViewModel : BaseViewModel
         Title = "Iniciar sesión";
     }
 
+    /// <summary>
+    /// Entrada automática: si el celular ya tiene una sesión vigente (el token
+    /// dura todo el piloto), se salta el login. Se revisa en el celular, sin
+    /// llamar a la API.
+    /// </summary>
+    public async Task EntrarSiHaySesionAsync()
+    {
+        if (await authService.HaySesionActivaAsync())
+            await Shell.Current.GoToAsync("//MainPage");
+    }
+
     [RelayCommand]
     private async Task LoginAsync()
     {

@@ -84,6 +84,29 @@ public class ApiService(HttpClient http) : IApiService
         return (await response.Content.ReadFromJsonAsync<List<FaseEncuesta>>())!;
     }
 
+    public async Task<EstadoEncuestasResponse> ObtenerEstadoEncuestasAsync(string token)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Get, "api/encuestasbasal/estado");
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<EstadoEncuestasResponse>())!;
+    }
+
+    public async Task<EncuestaSusResponse> CrearEncuestaSusAsync(string token, EncuestaSusRequest request)
+    {
+        using var mensaje = new HttpRequestMessage(HttpMethod.Post, "api/encuestassus")
+        {
+            Content = JsonContent.Create(request),
+        };
+        mensaje.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await http.SendAsync(mensaje);
+        await LanzarSiEsErrorAsync(response);
+        return (await response.Content.ReadFromJsonAsync<EncuestaSusResponse>())!;
+    }
+
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string ruta, TRequest body)
     {
         using var response = await http.PostAsJsonAsync(ruta, body);
