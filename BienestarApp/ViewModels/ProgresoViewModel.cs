@@ -13,7 +13,9 @@ namespace BienestarApp.ViewModels;
 /// </summary>
 public partial class ProgresoViewModel : BaseViewModel
 {
-    private readonly IRegistroDiarioService registroDiarioService;
+    private const int DiasMostrados = 7;
+
+    private readonly ISincronizacionService sincronizacion;
     private readonly IAuthService authService;
 
     public ObservableCollection<DiaProgresoItem> Dias { get; } = [];
@@ -23,9 +25,9 @@ public partial class ProgresoViewModel : BaseViewModel
     [ObservableProperty] private int rachaDias;
     [ObservableProperty] private double promedioEstres;
 
-    public ProgresoViewModel(IRegistroDiarioService registroDiarioService, IAuthService authService)
+    public ProgresoViewModel(ISincronizacionService sincronizacion, IAuthService authService)
     {
-        this.registroDiarioService = registroDiarioService;
+        this.sincronizacion = sincronizacion;
         this.authService = authService;
         Title = "Mi progreso";
     }
@@ -36,10 +38,14 @@ public partial class ProgresoViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            var historial = await registroDiarioService.ObtenerHistorialAsync(7);
+            // Usa el historial que el celular ya tiene (se actualiza al
+            // guardar cada check-in); solo consulta la API si no se
+            // sincronizó hoy.
+            var historial = (await sincronizacion.ObtenerAsync()).Historial;
+            var desde = DateOnly.FromDateTime(DateTime.Now).AddDays(-(DiasMostrados - 1));
 
             Dias.Clear();
-            foreach (var r in historial)
+            foreach (var r in historial.Where(r => r.Fecha >= desde))
             {
                 Dias.Add(new DiaProgresoItem
                 {

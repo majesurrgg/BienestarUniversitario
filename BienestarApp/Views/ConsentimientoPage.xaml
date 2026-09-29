@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:BienestarApp.Models"
+             x:Class="BienestarApp.Views.ConsentimientoPage"
+             Title="Consentimiento informado">
+
+    <!-- Solo lectura: el texto vive en Models/Consentimiento.cs (con su
+         versión), y la aceptación se marca en RegisterPage. -->
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+            <Label Text="{x:Static models:Consentimiento.Texto}" FontSize="14" LineHeight="1.2" />
+            <Label Text="{Binding Source={x:Static models:Consentimiento.Version}, StringFormat='Versión del documento: {0}'}" FontSize="11" TextColor="Gray" />
+            <Button Text="Volver al registro" Clicked="OnVolverClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

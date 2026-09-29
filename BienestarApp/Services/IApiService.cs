@@ -29,4 +29,10 @@ public interface IApiService
 
     /// <summary>Fases (Basal/Final) que el usuario ya completó.</summary>
     Task<List<FaseEncuesta>> ObtenerFasesEncuestaBasalCompletadasAsync(string token);
+
+    /// <summary>Encuestas hechas y disponibles (basal, final con su fecha, SUS).</summary>
+    Task<EstadoEncuestasResponse> ObtenerEstadoEncuestasAsync(string token);
+
+    /// <summary>Evaluación de usabilidad (SUS). Lanza SesionExpiradaException si la API responde 401.</summary>
+    Task<EncuestaSusResponse> CrearEncuestaSusAsync(string token, EncuestaSusRequest request);
 }

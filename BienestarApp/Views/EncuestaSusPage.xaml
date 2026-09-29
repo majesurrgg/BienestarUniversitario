@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             xmlns:items="clr-namespace:BienestarApp.ViewModels.Items"
+             x:Class="BienestarApp.Views.EncuestaSusPage"
+             x:DataType="viewmodels:EncuestaSusViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <Label Text="¿Qué tan fácil fue usar la app?" Style="{StaticResource Headline}" />
+
+            <!-- Bloqueada (todavía no toca, o ya la respondió) -->
+            <Label Text="{Binding MensajeBloqueo}" IsVisible="{Binding AccesoBloqueado}" HorizontalTextAlignment="Center" />
+
+            <!-- Formulario -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding MostrarFormulario}">
+                <Label Text="Indica qué tan de acuerdo estás con cada afirmación sobre la app Bienestar Universitario. No hay respuestas buenas ni malas."
+                       FontSize="13" />
+
+                <CollectionView ItemsSource="{Binding Preguntas}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="items:PreguntaSusItem">
+                            <VerticalStackLayout Spacing="4" Margin="0,8">
+                                <Label FontAttributes="Bold">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Numero, StringFormat='{0}. '}" />
+                                            <Span Text="{Binding Texto}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Picker Title="Selecciona una respuesta" SelectedIndex="{Binding IndiceRespuesta}">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>1 · Totalmente en desacuerdo</x:String>
+                                            <x:String>2 · En desacuerdo</x:String>
+                                            <x:String>3 · Ni de acuerdo ni en desacuerdo</x:String>
+                                            <x:String>4 · De acuerdo</x:String>
+                                            <x:String>5 · Totalmente de acuerdo</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                </Picker>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Label Text="¿Qué fue lo más útil de la app? (opcional)" FontAttributes="Bold" />
+                <Editor Text="{Binding ComentarioLoMasUtil}" AutoSize="TextChanges" MaxLength="1000" Placeholder="Escribe aquí..." />
+
+                <Label Text="¿Qué mejorarías? (opcional)" FontAttributes="Bold" />
+                <Editor Text="{Binding ComentarioMejoras}" AutoSize="TextChanges" MaxLength="1000" Placeholder="Escribe aquí..." />
+
+                <Label Text="{Binding MensajeError}"
+                       TextColor="Red"
+                       IsVisible="{Binding MensajeError, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                <Button Text="Enviar evaluación" Command="{Binding EnviarCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            </VerticalStackLayout>
+
+            <!-- Enviada -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding Enviado}">
+                <Label Text="✔ ¡Gracias por evaluar la app!" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
+                <Label Text="Con esto completaste tu participación en el piloto. Tu ayuda es muy valiosa para la investigación."
+                       HorizontalTextAlignment="Center" FontSize="13" />
+            </VerticalStackLayout>
+
+            <Button Text="Volver" Command="{Binding VolverCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

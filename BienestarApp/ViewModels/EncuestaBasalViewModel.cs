@@ -21,6 +21,7 @@ public partial class EncuestaBasalViewModel : BaseViewModel
 {
     private readonly IEncuestaBasalService encuestaBasalService;
     private readonly IAuthService authService;
+    private readonly ISincronizacionService sincronizacion;
 
     private const int TotalPasos = 4;
     private FaseEncuesta? faseActual;
@@ -158,10 +159,11 @@ public partial class EncuestaBasalViewModel : BaseViewModel
     /// <summary>Solo se ve el asistente cuando ya se sabe la fase, el acceso no está bloqueado, y no se envió todavía.</summary>
     public bool MostrarAsistente => !CargandoEstado && !AccesoBloqueado && !Enviado;
 
-    public EncuestaBasalViewModel(IEncuestaBasalService encuestaBasalService, IAuthService authService)
+    public EncuestaBasalViewModel(IEncuestaBasalService encuestaBasalService, IAuthService authService, ISincronizacionService sincronizacion)
     {
         this.encuestaBasalService = encuestaBasalService;
         this.authService = authService;
+        this.sincronizacion = sincronizacion;
         Title = "Encuesta basal";
 
         PreguntasPhq9 = new ObservableCollection<PreguntaPhq9Item>(
@@ -173,10 +175,12 @@ public partial class EncuestaBasalViewModel : BaseViewModel
 
     /// <summary>
     /// Decide qué fase toca (Basal si no existe, si no Final) y bloquea el
-    /// acceso si ya se completaron las dos. Se llama al abrir la pantalla —
-    /// nunca se confía solo en la validación del servidor al enviar, para
-    /// no dejar que alguien llene 37 preguntas y recién ahí se entere de
-    /// que la fase ya estaba hecha.
+    /// acceso si ya se completaron las dos o si la final todavía no se
+    /// habilita (la fecha la decide la API: "Piloto:FechaHabilitaEncuestaFinal").
+    /// Se llama al abrir la pantalla — nunca se confía solo en la validación
+    /// del servidor al enviar, para no dejar que alguien llene 37 preguntas
+    /// y recién ahí se entere de que no podía. Es una sola consulta y esta
+    /// pantalla se abre muy pocas veces en todo el piloto.
     /// </summary>
     public async Task InicializarAsync()
     {
@@ -187,15 +191,24 @@ public partial class EncuestaBasalViewModel : BaseViewModel
 
         try
         {
-            var completadas = await encuestaBasalService.ObtenerFasesCompletadasAsync();
+            var datos = await sincronizacion.ActualizarEstadoEncuestasAsync();
+            var hoy = DateOnly.FromDateTime(DateTime.Now);
 
-            if (completadas.Contains(FaseEncuesta.Basal) && completadas.Contains(FaseEncuesta.Final))
+            if (datos.BasalCompletada && datos.FinalCompletada)
             {
                 AccesoBloqueado = true;
-                MensajeBloqueo = "Ya completaste las dos fases de la encuesta basal (inicial y final). No hace falta volver a llenarla.";
+                MensajeBloqueo = "Ya completaste las dos encuestas (inicial y de cierre). ¡Gracias por participar!";
                 faseActual = null;
             }
-            else if (completadas.Contains(FaseEncuesta.Basal))
+            else if (datos.BasalCompletada && !datos.FinalDisponible(hoy))
+            {
+                AccesoBloqueado = true;
+                MensajeBloqueo = datos.FechaHabilitaFinal is { } fecha
+                    ? $"Ya completaste la encuesta inicial. La encuesta de cierre se habilita el {fecha:dd/MM/yyyy}; te avisaremos por el canal del piloto."
+                    : "Ya completaste la encuesta inicial. La encuesta de cierre se habilitará al final del piloto.";
+                faseActual = null;
+            }
+            else if (datos.BasalCompletada)
             {
                 faseActual = FaseEncuesta.Final;
                 FaseActualTexto = "Fase: Final (cierre del piloto)";
@@ -274,6 +287,7 @@ public partial class EncuestaBasalViewModel : BaseViewModel
             });
 
             Enviado = true;
+            sincronizacion.RegistrarEncuesta(faseActual.Value);
 
             if (respuesta.RequiereAtencionInmediata)
             {

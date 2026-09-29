@@ -41,6 +41,8 @@ public static class MauiProgram
 		services.AddTransient<Views.CheckInPage>();
 		services.AddTransient<Views.EncuestaBasalPage>();
 		services.AddTransient<Views.ProgresoPage>();
+		services.AddTransient<Views.ConsentimientoPage>();
+		services.AddTransient<Views.EncuestaSusPage>();
 
 		// ViewModels
 		services.AddTransient<LoginViewModel>();
@@ -49,6 +51,7 @@ public static class MauiProgram
 		services.AddTransient<CheckInViewModel>();
 		services.AddTransient<EncuestaBasalViewModel>();
 		services.AddTransient<ProgresoViewModel>();
+		services.AddTransient<EncuestaSusViewModel>();
 
 		// Services: HttpClient tipado hacia BienestarApi + servicios propios.
 		// Singleton porque no guardan estado por pantalla (la sesión vive en
@@ -61,5 +64,10 @@ public static class MauiProgram
 		services.AddSingleton<IRegistroDiarioService, RegistroDiarioService>();
 		services.AddSingleton<IEncuestaBasalService, EncuestaBasalService>();
 		services.AddSingleton<IRecordatorioService, RecordatorioService>();
+		services.AddSingleton<IEncuestaSusService, EncuestaSusService>();
+		// Copia local del estado del estudiante + cuándo consultar la API
+		// (ahorra consultas a la base de Azure; ver DatosLocales).
+		services.AddSingleton<IDatosLocalesService, DatosLocalesService>();
+		services.AddSingleton<ISincronizacionService, SincronizacionService>();
 	}
 }

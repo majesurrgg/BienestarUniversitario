@@ -24,4 +24,18 @@ public class RegisterRequest
 
     [Required, MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Código que se entrega a los inscritos confirmados del piloto. Solo es
+    /// obligatorio si el servidor tiene configurado "Piloto:CodigoInvitacion"
+    /// (en desarrollo local puede quedar vacío).
+    /// </summary>
+    public string? CodigoInvitacion { get; set; }
+
+    /// <summary>Debe ser true: sin consentimiento informado no se crea la cuenta.</summary>
+    public bool AceptaConsentimiento { get; set; }
+
+    /// <summary>Versión del texto de consentimiento que se le mostró (ej. "v1").</summary>
+    [MaxLength(20)]
+    public string? VersionConsentimiento { get; set; }
 }
