@@ -17,7 +17,7 @@ public static class Consentimiento
     public const string Universidad = "Universidad Tecnológica del Perú";
 
     // TODO: completar antes de generar el APK del piloto (correo o WhatsApp).
-    public const string Contacto = "[COMPLETAR: correo o WhatsApp de contacto]";
+    public const string Contacto = "escuchabetania@gmail.com";
 
     public const string Texto =
         "CONSENTIMIENTO INFORMADO\n" +
