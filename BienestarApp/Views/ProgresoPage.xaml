@@ -18,9 +18,12 @@
 
             <!-- Racha + promedio: lo que hace que volver todos los días valga la pena. -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding SinDatos, Converter={StaticResource InvertedBoolConverter}}">
-                <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Primary}" Padding="16">
+                <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Padding="16"
+                        Stroke="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
                     <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
-                        <Label Text="{Binding RachaDias, StringFormat='{0} 🔥'}" FontSize="28" HorizontalOptions="Center" />
+                        <Label Text="{Binding RachaDias, StringFormat='{0} 🔥'}" FontSize="28" HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}" />
                         <Label Text="días seguidos" FontSize="12" HorizontalOptions="Center" />
                     </VerticalStackLayout>
                 </Border>
@@ -35,27 +38,36 @@
             <Label Text="Sin check-ins todavía en los últimos 7 días." IsVisible="{Binding SinDatos}" HorizontalOptions="Center" />
 
             <Label Text="Nivel de estrés por día" Style="{StaticResource SubHeadline}" FontSize="18" IsVisible="{Binding SinDatos, Converter={StaticResource InvertedBoolConverter}}" />
+            <Label Text="1 = muy bajo · 10 = muy alto" FontSize="12" HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                   IsVisible="{Binding SinDatos, Converter={StaticResource InvertedBoolConverter}}" />
 
             <CollectionView ItemsSource="{Binding Dias}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="items:DiaProgresoItem">
-                        <VerticalStackLayout Spacing="4" Margin="0,6">
-                            <Grid ColumnDefinitions="70,*">
-                                <Label Grid.Column="0" Text="{Binding FechaTexto}" FontSize="12" VerticalOptions="Center" />
-                                <BoxView Grid.Column="1" HeightRequest="16" CornerRadius="4"
-                                         Color="{Binding ColorBarraEstres}"
-                                         WidthRequest="{Binding AnchoBarraEstres}"
-                                         HorizontalOptions="Start" />
+                        <VerticalStackLayout Spacing="6" Margin="0,8">
+                            <!-- Fecha | barra (fondo de 0 a 10 + parte llena) | valor -->
+                            <Grid ColumnDefinitions="72,*,48" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="{Binding FechaTexto}" FontSize="13" VerticalOptions="Center" />
+                                <Border Grid.Column="1"
+                                        HeightRequest="14"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 7"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}"
+                                        VerticalOptions="Center">
+                                    <AbsoluteLayout>
+                                        <Border AbsoluteLayout.LayoutFlags="All"
+                                                AbsoluteLayout.LayoutBounds="{Binding LimitesBarraEstres}"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 7"
+                                                BackgroundColor="{Binding ColorBarraEstres}" />
+                                    </AbsoluteLayout>
+                                </Border>
+                                <Label Grid.Column="2" Text="{Binding EstresTexto}" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="End" VerticalOptions="Center" />
                             </Grid>
-                            <Label FontSize="11" TextColor="Gray">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding CalidadSueno, StringFormat='Sueño: {0}/5 · '}" />
-                                        <Span Text="{Binding EstadoAnimo, StringFormat='Ánimo: {0}/5 · '}" />
-                                        <Span Text="{Binding MinutosActividadFisica, StringFormat='Actividad: {0} min'}" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+                            <Label Text="{Binding DetalleTexto}" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                         </VerticalStackLayout>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

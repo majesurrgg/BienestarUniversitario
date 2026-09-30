@@ -15,7 +15,12 @@
             <Entry Placeholder="Código universitario" Text="{Binding CodigoUniversitario}" />
             <Entry Placeholder="Carrera" Text="{Binding Carrera}" />
             <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
-            <Entry Placeholder="Contraseña (mínimo 8 caracteres)" IsPassword="True" Text="{Binding Password}" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Entry Placeholder="Contraseña (mínimo 8 caracteres)" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
+                <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
+                        BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
+                        SemanticProperties.Description="Mostrar u ocultar la contraseña" />
+            </Grid>
             <Entry Placeholder="Código de invitación" Text="{Binding CodigoInvitacion}" />
 
             <!-- Consentimiento informado: obligatorio (Ley 29733, datos de salud).

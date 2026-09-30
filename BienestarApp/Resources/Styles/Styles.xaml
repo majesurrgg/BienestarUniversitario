@@ -406,11 +406,11 @@
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <!-- Fijo en blanco en los dos temas: la barra superior nativa de
-             Android siempre es turquesa (colorPrimary, ver
-             Platforms/Android/Resources/values/colors.xml), no cambia con
-             el tema del celular — así que el texto tampoco debería. -->
+        <!-- Barra superior turquesa (Primary) y texto/flechas blancos en los
+             DOS temas. Antes el fondo era blanco en modo claro y el texto
+             blanco fijo: en modo claro el título y la flecha "atrás"
+             desaparecían (blanco sobre blanco). -->
+        <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.ForegroundColor" Value="White" />
         <Setter Property="Shell.TitleColor" Value="White" />
         <Setter Property="Shell.DisabledColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
@@ -423,9 +423,9 @@
     </Style>
 
     <Style TargetType="NavigationPage">
-        <Setter Property="BarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
+        <Setter Property="BarBackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="BarTextColor" Value="White" />
+        <Setter Property="IconColor" Value="White" />
     </Style>
 
     <Style TargetType="TabbedPage">

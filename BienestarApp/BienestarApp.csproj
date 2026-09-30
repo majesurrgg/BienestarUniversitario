@@ -39,8 +39,8 @@
 		<!-- ApplicationVersion (entero) debe SUBIR en cada APK que se reparta:
 		     Android no instala una versión encima de otra con número igual o
 		     menor. ApplicationDisplayVersion es solo el texto que ve el usuario. -->
-		<ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
-		<ApplicationVersion>2</ApplicationVersion>
+		<ApplicationDisplayVersion>1.2</ApplicationDisplayVersion>
+		<ApplicationVersion>3</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
