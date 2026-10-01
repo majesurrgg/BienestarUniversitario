@@ -18,6 +18,12 @@
                 SemanticProperties.HeadingLevel="Level1" />
             <Label Text="{Binding Subtitulo}" Style="{StaticResource SubHeadline}" FontSize="14" />
 
+            <!-- Frase del día: cambia cada día, en el rosa de "logros" (Acento). -->
+            <Label Text="{Binding FraseDelDia}"
+                   FontAttributes="Italic" FontSize="14"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}" />
+
             <Label Text="{Binding MensajeConexion}"
                    TextColor="Red" FontSize="13" HorizontalTextAlignment="Center"
                    IsVisible="{Binding MensajeConexion, Converter={StaticResource StringNotEmptyConverter}}" />

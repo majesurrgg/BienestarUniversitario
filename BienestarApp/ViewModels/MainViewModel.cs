@@ -26,6 +26,10 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     private string subtitulo = string.Empty;
 
+    /// <summary>Frase breve de bienestar, distinta cada día (lista fija, sin consultar la API).</summary>
+    [ObservableProperty]
+    private string fraseDelDia = string.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PuedeHacerCheckIn))]
     private bool encuestaBasalCompletada;
@@ -63,6 +67,7 @@ public partial class MainViewModel : BaseViewModel
         var nombre = await authService.ObtenerNombreAsync();
         Title = string.IsNullOrEmpty(nombre) ? "Bienestar Universitario" : $"Hola, {nombre}";
         Subtitulo = Saludo();
+        FraseDelDia = $"“{FrasesDelDia.Para(DateOnly.FromDateTime(DateTime.Now))}”";
 
         // La sesión se revisa en el celular (fecha de vencimiento del token),
         // sin llamar a la API.

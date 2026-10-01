@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using BienestarApp.Models;
 using BienestarApp.Services;
+using BienestarApp.ViewModels.Items;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -44,6 +46,16 @@ public partial class CheckInViewModel : BaseViewModel
     [ObservableProperty]
     private string mensajeError = string.Empty;
 
+    /// <summary>
+    /// true solo justo después de guardar (no al abrir la pantalla con el
+    /// día ya registrado): la Vista lo usa para la pequeña celebración.
+    /// </summary>
+    [ObservableProperty]
+    private bool recienGuardado;
+
+    /// <summary>Las 5 caritas del ánimo (reemplazan al deslizador: más rápido y más claro).</summary>
+    public ObservableCollection<OpcionAnimoItem> OpcionesAnimo { get; }
+
     public CheckInViewModel(
         IRegistroDiarioService registroDiarioService,
         IAuthService authService,
@@ -55,6 +67,28 @@ public partial class CheckInViewModel : BaseViewModel
         this.recordatorioService = recordatorioService;
         this.sincronizacion = sincronizacion;
         Title = "Mi día";
+
+        OpcionesAnimo =
+        [
+            new(1, "😞", "Muy malo", SeleccionarAnimo),
+            new(2, "😕", "Malo", SeleccionarAnimo),
+            new(3, "😐", "Regular", SeleccionarAnimo),
+            new(4, "🙂", "Bueno", SeleccionarAnimo),
+            new(5, "😄", "Muy bueno", SeleccionarAnimo),
+        ];
+        MarcarAnimoSeleccionado();
+    }
+
+    private void SeleccionarAnimo(OpcionAnimoItem opcion)
+    {
+        EstadoAnimo = opcion.Valor;
+        MarcarAnimoSeleccionado();
+    }
+
+    private void MarcarAnimoSeleccionado()
+    {
+        foreach (var opcion in OpcionesAnimo)
+            opcion.Seleccionado = opcion.Valor == (int)EstadoAnimo;
     }
 
     public bool MostrarFormulario => !YaRegistroHoy;
@@ -66,6 +100,7 @@ public partial class CheckInViewModel : BaseViewModel
     public async Task InicializarAsync()
     {
         MensajeError = string.Empty;
+        RecienGuardado = false;
         try
         {
             IsBusy = true;
@@ -106,6 +141,7 @@ public partial class CheckInViewModel : BaseViewModel
             });
             sincronizacion.RegistrarCheckIn(guardado);
             MostrarResultado(guardado);
+            RecienGuardado = true;
         }
         catch (SesionExpiradaException)
         {
@@ -163,7 +199,7 @@ public partial class CheckInViewModel : BaseViewModel
             $"Estrés: {registro.NivelEstres}/10\n" +
             $"Sueño: {registro.CalidadSueno}/5\n" +
             $"Actividad física: {registro.MinutosActividadFisica} min\n" +
-            $"Ánimo: {registro.EstadoAnimo}/5";
+            $"Ánimo: {OpcionesAnimo.FirstOrDefault(o => o.Valor == registro.EstadoAnimo)?.Emoji} {registro.EstadoAnimo}/5";
     }
 
     private async Task VolverAlLoginAsync()

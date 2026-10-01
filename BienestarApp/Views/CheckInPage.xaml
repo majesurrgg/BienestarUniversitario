@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             xmlns:items="clr-namespace:BienestarApp.ViewModels.Items"
              x:Class="BienestarApp.Views.CheckInPage"
              x:DataType="viewmodels:CheckInViewModel"
              Title="{Binding Title}">
@@ -27,8 +28,31 @@
                 <Slider Minimum="1" Maximum="5" Value="{Binding CalidadSueno}" />
                 <Label Text="{Binding DescripcionSueno}" FontSize="12" HorizontalOptions="Center" />
 
-                <Label Text="{Binding EstadoAnimo, StringFormat='Estado de ánimo: {0:F0} / 5'}" FontAttributes="Bold" />
-                <Slider Minimum="1" Maximum="5" Value="{Binding EstadoAnimo}" />
+                <!-- Ánimo con caritas (1 a 5): se toca una en vez de arrastrar
+                     un deslizador. La elegida se marca en rosa (Acento). -->
+                <Label Text="¿Cómo estuvo tu ánimo?" FontAttributes="Bold" />
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8" BindableLayout.ItemsSource="{Binding OpcionesAnimo}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="items:OpcionAnimoItem">
+                            <Border WidthRequest="54" HeightRequest="54"
+                                    StrokeShape="RoundRectangle 27" StrokeThickness="2"
+                                    Stroke="Transparent" BackgroundColor="Transparent" Opacity="0.5"
+                                    SemanticProperties.Description="{Binding Etiqueta}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Seleccionado}" Value="True">
+                                        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}" />
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}" />
+                                        <Setter Property="Opacity" Value="1" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SeleccionarCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding Emoji}" FontSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
                 <Label Text="{Binding DescripcionAnimo}" FontSize="12" HorizontalOptions="Center" />
 
                 <Label Text="{Binding MinutosActividadFisica, StringFormat='Actividad física: {0:F0} minutos'}" FontAttributes="Bold" />
@@ -43,6 +67,9 @@
 
             <!-- Resumen: si ya registró hoy -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding YaRegistroHoy}">
+                <!-- El corazón "late" justo después de guardar (ver CheckInPage.xaml.cs). -->
+                <Image x:Name="CorazonCelebracion" Source="logo_bienestar.svg"
+                       HeightRequest="64" WidthRequest="64" HorizontalOptions="Center" />
                 <Label Text="✔ Ya registraste tu día de hoy" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
                 <Label Text="{Binding ResumenHoy}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                 <Label Text="Vuelve mañana para tu siguiente registro." FontSize="12" HorizontalOptions="Center" />
