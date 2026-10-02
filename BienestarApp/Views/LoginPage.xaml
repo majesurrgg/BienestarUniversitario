@@ -12,7 +12,16 @@
          bien. El formulario va en una tarjeta con el color de fondo del tema
          (claro u oscuro), así los campos y textos no dependen de la foto. -->
     <Grid>
-        <Image Source="fondo_login.jpg" Aspect="AspectFill" />
+        <!-- Degradado turquesa de respaldo: si la foto no cargara, la
+             pantalla igual se ve bien (y no gris). -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource Primary}" Offset="0" />
+                <GradientStop Color="#0F3E3B" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Image Source="fondo_login.jpg" Aspect="AspectFill" HorizontalOptions="Fill" VerticalOptions="Fill" />
         <BoxView Color="Black" Opacity="0.35" />
 
         <ScrollView>
