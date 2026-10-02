@@ -18,11 +18,17 @@
                 SemanticProperties.HeadingLevel="Level1" />
             <Label Text="{Binding Subtitulo}" Style="{StaticResource SubHeadline}" FontSize="14" />
 
-            <!-- Frase del día: cambia cada día, en el rosa de "logros" (Acento). -->
-            <Label Text="{Binding FraseDelDia}"
-                   FontAttributes="Italic" FontSize="14"
-                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}" />
+            <!-- Frase del día: tarjeta con fondo rosa suave y texto en el color
+                 normal (un texto de color rojizo parecería un error). -->
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16,12"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="🌸 Frase del día" FontSize="12" FontAttributes="Bold" HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                    <Label Text="{Binding FraseDelDia}" FontAttributes="Italic" FontSize="14"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
 
             <Label Text="{Binding MensajeConexion}"
                    TextColor="Red" FontSize="13" HorizontalTextAlignment="Center"
@@ -91,6 +97,9 @@
 
                 <Button Text="Registrar mi día" Command="{Binding IrACheckInCommand}" />
                 <Button Text="Mi progreso" Command="{Binding IrAProgresoCommand}" />
+                <Button Text="🌬️ Respira 1 minuto" Command="{Binding IrARespiracionCommand}"
+                        BackgroundColor="Transparent" BorderColor="{StaticResource Primary}" BorderWidth="1"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
             </VerticalStackLayout>
 
             <Button Text="Cerrar sesión" Command="{Binding CerrarSesionCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />

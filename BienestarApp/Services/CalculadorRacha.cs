@@ -25,4 +25,21 @@ public static class CalculadorRacha
         }
         return racha;
     }
+
+    /// <summary>
+    /// La racha más larga de todo el historial (no solo la actual): los
+    /// logros ganados no se pierden si después se corta la racha.
+    /// </summary>
+    public static int Mejor(IEnumerable<DateOnly> fechas)
+    {
+        var ordenadas = fechas.Distinct().Order().ToList();
+        var mejor = 0;
+        var actual = 0;
+        for (var i = 0; i < ordenadas.Count; i++)
+        {
+            actual = i > 0 && ordenadas[i] == ordenadas[i - 1].AddDays(1) ? actual + 1 : 1;
+            mejor = Math.Max(mejor, actual);
+        }
+        return mejor;
+    }
 }

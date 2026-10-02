@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             xmlns:items="clr-namespace:BienestarApp.ViewModels.Items"
+             x:Class="BienestarApp.Views.BienvenidaPage"
+             x:DataType="viewmodels:BienvenidaViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Padding="24,16,24,32" RowSpacing="16">
+
+        <Button Text="Saltar" Command="{Binding TerminarCommand}"
+                HorizontalOptions="End" BackgroundColor="Transparent"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+        <CarouselView Grid.Row="1"
+                      ItemsSource="{Binding Diapositivas}"
+                      Position="{Binding Posicion, Mode=TwoWay}"
+                      IndicatorView="{x:Reference Indicador}"
+                      Loop="False">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="items:DiapositivaItem">
+                    <VerticalStackLayout Spacing="20" VerticalOptions="Center" Padding="8,0">
+                        <Border WidthRequest="140" HeightRequest="140" StrokeShape="Ellipse" StrokeThickness="0"
+                                HorizontalOptions="Center"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
+                            <Label Text="{Binding Emoji}" FontSize="64" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Text="{Binding Titulo}" Style="{StaticResource Headline}" FontSize="26" HorizontalTextAlignment="Center" />
+                        <Label Text="{Binding Texto}" FontSize="16" HorizontalTextAlignment="Center" LineHeight="1.2" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <IndicatorView x:Name="Indicador" Grid.Row="2" HorizontalOptions="Center"
+                       IndicatorSize="9"
+                       IndicatorColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                       SelectedIndicatorColor="{StaticResource Acento}" />
+
+        <Button Grid.Row="3" Text="{Binding TextoBoton}" Command="{Binding SiguienteCommand}" />
+    </Grid>
+
+</ContentPage>

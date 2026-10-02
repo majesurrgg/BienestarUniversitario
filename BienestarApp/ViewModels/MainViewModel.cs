@@ -134,6 +134,9 @@ public partial class MainViewModel : BaseViewModel
     private static async Task IrAProgresoAsync() => await Shell.Current.GoToAsync(nameof(Views.ProgresoPage));
 
     [RelayCommand]
+    private static async Task IrARespiracionAsync() => await Shell.Current.GoToAsync(nameof(Views.RespiracionPage));
+
+    [RelayCommand]
     private static async Task IrAEncuestaBasalAsync() => await Shell.Current.GoToAsync(nameof(Views.EncuestaBasalPage));
 
     [RelayCommand]

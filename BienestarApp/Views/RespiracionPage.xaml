@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
+             x:Class="BienestarApp.Views.RespiracionPage"
+             x:DataType="viewmodels:RespiracionViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="24">
+
+            <Label Text="Un minuto para ti" Style="{StaticResource Headline}" HorizontalOptions="Center" />
+            <Label Text="Sigue el círculo: crece cuando inhalas y se achica cuando exhalas."
+                   FontSize="14" HorizontalTextAlignment="Center" />
+
+            <!-- El círculo se anima en RespiracionPage.xaml.cs según la fase. -->
+            <Grid HeightRequest="260" WidthRequest="260" HorizontalOptions="Center">
+                <Border x:Name="Circulo"
+                        WidthRequest="240" HeightRequest="240"
+                        StrokeShape="Ellipse" StrokeThickness="3"
+                        Stroke="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}"
+                        Scale="0.55" />
+                <Label Text="{Binding SegundosRestantes}" FontSize="36" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+
+            <Label Text="{Binding Indicacion}" FontSize="16" HorizontalTextAlignment="Center" />
+
+            <Button Text="Empezar" Command="{Binding EmpezarCommand}" IsVisible="{Binding Detenido}" />
+            <Button Text="Detener" Command="{Binding DetenerCommand}" IsVisible="{Binding EnCurso}"
+                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+
+            <Label Text="Si en algún momento te sientes mareado/a, vuelve a respirar con normalidad."
+                   FontSize="12" HorizontalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

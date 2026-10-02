@@ -53,6 +53,10 @@ public partial class CheckInViewModel : BaseViewModel
     [ObservableProperty]
     private bool recienGuardado;
 
+    /// <summary>Estrés de hoy en 7 o más: se sugiere el ejercicio de respiración.</summary>
+    [ObservableProperty]
+    private bool estresAltoHoy;
+
     /// <summary>Las 5 caritas del ánimo (reemplazan al deslizador: más rápido y más claro).</summary>
     public ObservableCollection<OpcionAnimoItem> OpcionesAnimo { get; }
 
@@ -193,6 +197,7 @@ public partial class CheckInViewModel : BaseViewModel
         // pantalla de check-in, que ya cumplió su trabajo principal.
         _ = recordatorioService.ProgramarSiFaltaAsync(registro is not null);
 
+        EstresAltoHoy = registro?.NivelEstres >= 7;
         if (registro is null) return;
 
         ResumenHoy =
@@ -201,6 +206,9 @@ public partial class CheckInViewModel : BaseViewModel
             $"Actividad física: {registro.MinutosActividadFisica} min\n" +
             $"Ánimo: {OpcionesAnimo.FirstOrDefault(o => o.Valor == registro.EstadoAnimo)?.Emoji} {registro.EstadoAnimo}/5";
     }
+
+    [RelayCommand]
+    private static async Task IrARespiracionAsync() => await Shell.Current.GoToAsync(nameof(Views.RespiracionPage));
 
     private async Task VolverAlLoginAsync()
     {

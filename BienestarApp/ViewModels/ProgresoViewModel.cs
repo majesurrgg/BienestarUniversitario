@@ -20,6 +20,8 @@ public partial class ProgresoViewModel : BaseViewModel
 
     public ObservableCollection<DiaProgresoItem> Dias { get; } = [];
 
+    public ObservableCollection<LogroItem> Logros { get; } = [];
+
     [ObservableProperty] private string mensajeError = string.Empty;
     [ObservableProperty] private bool sinDatos;
     [ObservableProperty] private int rachaDias;
@@ -60,6 +62,10 @@ public partial class ProgresoViewModel : BaseViewModel
             SinDatos = Dias.Count == 0;
             PromedioEstres = Dias.Count > 0 ? Math.Round(Dias.Average(d => d.NivelEstres), 1) : 0;
             RachaDias = CalculadorRacha.Calcular([.. historial.Select(r => r.Fecha)]);
+
+            Logros.Clear();
+            foreach (var logro in CalculadorLogros.Calcular([.. historial.Select(r => r.Fecha)]))
+                Logros.Add(logro);
         }
         catch (SesionExpiradaException)
         {

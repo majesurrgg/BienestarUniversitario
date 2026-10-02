@@ -12,14 +12,15 @@
     <Color x:Key="SecondaryDarkText">#9880e5</Color>
     <Color x:Key="Tertiary">#2B0B98</Color>
 
-    <!-- Acento rosa palo / malva: complementa al turquesa (Primary) sin ser
-         infantil. Se usa en los "logros" (racha, día registrado, números de
-         Mi progreso), no en botones: el turquesa sigue siendo el color de
-         acción. AcentoFondo es la versión muy clara para rellenar tarjetas. -->
-    <Color x:Key="Acento">#C98A9A</Color>
-    <Color x:Key="AcentoOscuro">#E3A9B7</Color>
-    <Color x:Key="AcentoFondo">#FBEFF2</Color>
-    <Color x:Key="AcentoFondoOscuro">#2E2327</Color>
+    <!-- Acento rosa suave: complementa al turquesa (Primary). Se usa en los
+         "logros" y detalles amables (racha, día registrado, frase del día,
+         carita elegida) SOLO como fondo, borde o ícono — nunca como color
+         de texto: el texto rojizo se confunde con los mensajes de error.
+         El turquesa sigue siendo el color de acción (botones). -->
+    <Color x:Key="Acento">#E991AE</Color>
+    <Color x:Key="AcentoOscuro">#F3A9C2</Color>
+    <Color x:Key="AcentoFondo">#FCE4EC</Color>
+    <Color x:Key="AcentoFondoOscuro">#3B2731</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
