@@ -7,7 +7,7 @@
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}">
 
-    <!-- Fondo: foto del árbol (Resources/Images/fondo_login.jpg) a pantalla
+    <!-- Fondo: foto del árbol (Resources/Raw/fondo_login.jpg) a pantalla
          completa, con una capa oscura encima para que el formulario se lea
          bien. El formulario va en una tarjeta con el color de fondo del tema
          (claro u oscuro), así los campos y textos no dependen de la foto. -->
@@ -21,7 +21,8 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Image Source="fondo_login.jpg" Aspect="AspectFill" HorizontalOptions="Fill" VerticalOptions="Fill" />
+        <!-- La foto se carga en LoginPage.xaml.cs desde Resources/Raw. -->
+        <Image x:Name="FondoImagen" Aspect="AspectFill" HorizontalOptions="Fill" VerticalOptions="Fill" />
         <BoxView Color="Black" Opacity="0.35" />
 
         <ScrollView>
