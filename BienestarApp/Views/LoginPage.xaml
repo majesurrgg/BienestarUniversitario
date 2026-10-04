@@ -14,7 +14,12 @@
             <Label Text="Inicia sesión para continuar" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
 
             <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
-            <Entry Placeholder="Contraseña" IsPassword="True" Text="{Binding Password}" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Entry Placeholder="Contraseña" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
+                <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
+                        BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
+                        SemanticProperties.Description="Mostrar u ocultar la contraseña" />
+            </Grid>
 
             <Label Text="{Binding MensajeError}"
                    TextColor="Red"

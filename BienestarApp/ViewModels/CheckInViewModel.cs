@@ -7,14 +7,16 @@ namespace BienestarApp.ViewModels;
 
 /// <summary>
 /// Check-in diario: el estudiante registra estrés, sueño, actividad física y
-/// ánimo una vez al día. Al aparecer, la pantalla pregunta a la API si ya
-/// hizo el de hoy; si ya lo hizo, muestra el resumen en vez del formulario.
+/// ánimo una vez al día. Al aparecer, revisa si ya hizo el de hoy con lo que
+/// el celular ya sabe (<see cref="ISincronizacionService"/>), sin consultar
+/// la API; si ya lo hizo, muestra el resumen en vez del formulario.
 /// </summary>
 public partial class CheckInViewModel : BaseViewModel
 {
     private readonly IRegistroDiarioService registroDiarioService;
     private readonly IAuthService authService;
     private readonly IRecordatorioService recordatorioService;
+    private readonly ISincronizacionService sincronizacion;
 
     // Los Slider/Stepper de MAUI trabajan con double; se redondean al
     // moverse y se envían como int (las escalas son enteras).
@@ -42,11 +44,16 @@ public partial class CheckInViewModel : BaseViewModel
     [ObservableProperty]
     private string mensajeError = string.Empty;
 
-    public CheckInViewModel(IRegistroDiarioService registroDiarioService, IAuthService authService, IRecordatorioService recordatorioService)
+    public CheckInViewModel(
+        IRegistroDiarioService registroDiarioService,
+        IAuthService authService,
+        IRecordatorioService recordatorioService,
+        ISincronizacionService sincronizacion)
     {
         this.registroDiarioService = registroDiarioService;
         this.authService = authService;
         this.recordatorioService = recordatorioService;
+        this.sincronizacion = sincronizacion;
         Title = "Mi día";
     }
 
@@ -62,8 +69,10 @@ public partial class CheckInViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            var deHoy = await registroDiarioService.ObtenerDeHoyAsync();
-            MostrarResultado(deHoy);
+            // Normalmente no consulta nada: la pantalla principal ya
+            // sincronizó hoy. Solo llama a la API si todavía no lo hizo.
+            var datos = await sincronizacion.ObtenerAsync();
+            MostrarResultado(datos.CheckInDe(DateOnly.FromDateTime(DateTime.Now)));
         }
         catch (SesionExpiradaException)
         {
@@ -95,6 +104,7 @@ public partial class CheckInViewModel : BaseViewModel
                 MinutosActividadFisica = (int)MinutosActividadFisica,
                 EstadoAnimo = (int)EstadoAnimo,
             });
+            sincronizacion.RegistrarCheckIn(guardado);
             MostrarResultado(guardado);
         }
         catch (SesionExpiradaException)
@@ -104,6 +114,9 @@ public partial class CheckInViewModel : BaseViewModel
         catch (ApiException ex)
         {
             MensajeError = ex.Message;
+            // Si la API dice que ya había uno hoy (ej. hecho desde otro
+            // celular), se trae el real para mostrar el resumen correcto.
+            await ReintentarMostrarDeHoyAsync();
         }
         catch (Exception)
         {
@@ -112,6 +125,22 @@ public partial class CheckInViewModel : BaseViewModel
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task ReintentarMostrarDeHoyAsync()
+    {
+        try
+        {
+            var deHoy = await registroDiarioService.ObtenerDeHoyAsync();
+            if (deHoy is null) return;
+            sincronizacion.RegistrarCheckIn(deHoy);
+            MostrarResultado(deHoy);
+            MensajeError = string.Empty;
+        }
+        catch
+        {
+            // Se queda el mensaje de error original.
         }
     }
 

@@ -15,10 +15,16 @@ namespace BienestarApi.Services;
 public class AuthService(
     BienestarDbContext db,
     ITokenService tokenService,
-    IPasswordHasher<Cuenta> passwordHasher) : IAuthService
+    IPasswordHasher<Cuenta> passwordHasher,
+    IConfiguration configuration) : IAuthService
 {
     public async Task<AuthResponse> RegistrarAsync(RegisterRequest request)
     {
+        if (!request.AceptaConsentimiento)
+            throw new AuthException("Debes aceptar el consentimiento informado para participar.");
+
+        await ValidarCupoDelPilotoAsync(request.CodigoInvitacion);
+
         var emailNormalizado = request.Email.Trim().ToLowerInvariant();
 
         if (await db.Cuentas.AnyAsync(c => c.Email == emailNormalizado))
@@ -33,6 +39,8 @@ public class AuthService(
             CodigoUniversitario = request.CodigoUniversitario.Trim(),
             Carrera = request.Carrera.Trim(),
             FechaRegistro = DateTime.UtcNow,
+            FechaAceptaConsentimiento = DateTime.UtcNow,
+            VersionConsentimiento = request.VersionConsentimiento?.Trim(),
         };
 
         var cuenta = new Cuenta
@@ -88,5 +96,27 @@ public class AuthService(
             Nombre = cuenta.Usuario.Nombre,
             Email = cuenta.Email,
         };
+    }
+
+    /// <summary>
+    /// Reglas de inscripción del piloto, leídas de configuración para poder
+    /// cambiarlas en Azure (variables Piloto__CodigoInvitacion y
+    /// Piloto__MaxParticipantes) sin volver a publicar ni generar otro APK:
+    ///   • Código de invitación: si está configurado, hay que enviarlo igual
+    ///     (sin distinguir mayúsculas). Vacío = no se exige (desarrollo).
+    ///   • Cupo máximo: cuenta TODOS los usuarios de la base, incluidas las
+    ///     cuentas de prueba — hay que borrarlas o subir el número.
+    /// El código NO va en appsettings.json porque ese archivo está en GitHub.
+    /// </summary>
+    private async Task ValidarCupoDelPilotoAsync(string? codigoInvitacion)
+    {
+        var codigoEsperado = configuration["Piloto:CodigoInvitacion"];
+        if (!string.IsNullOrWhiteSpace(codigoEsperado) &&
+            !string.Equals(codigoInvitacion?.Trim(), codigoEsperado.Trim(), StringComparison.OrdinalIgnoreCase))
+            throw new AuthException("El código de invitación no es válido.");
+
+        var maximo = configuration.GetValue<int?>("Piloto:MaxParticipantes");
+        if (maximo is > 0 && await db.Usuarios.CountAsync() >= maximo)
+            throw new AuthException("Ya se completaron los cupos del piloto. ¡Gracias por tu interés!");
     }
 }

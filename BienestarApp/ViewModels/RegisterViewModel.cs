@@ -24,6 +24,13 @@ public partial class RegisterViewModel : BaseViewModel
     [ObservableProperty]
     private string password = string.Empty;
 
+    /// <summary>Lo entrega la investigadora a los inscritos confirmados (40 cupos). La API decide si es obligatorio.</summary>
+    [ObservableProperty]
+    private string codigoInvitacion = string.Empty;
+
+    [ObservableProperty]
+    private bool aceptaConsentimiento;
+
     [ObservableProperty]
     private string mensajeError = string.Empty;
 
@@ -47,6 +54,12 @@ public partial class RegisterViewModel : BaseViewModel
             return;
         }
 
+        if (!AceptaConsentimiento)
+        {
+            MensajeError = "Para participar, lee el consentimiento informado y marca «Acepto participar».";
+            return;
+        }
+
         try
         {
             IsBusy = true;
@@ -57,6 +70,9 @@ public partial class RegisterViewModel : BaseViewModel
                 Carrera = Carrera,
                 Email = Email,
                 Password = Password,
+                CodigoInvitacion = string.IsNullOrWhiteSpace(CodigoInvitacion) ? null : CodigoInvitacion.Trim(),
+                AceptaConsentimiento = AceptaConsentimiento,
+                VersionConsentimiento = Consentimiento.Version,
             });
             // El registro ya deja la sesión iniciada (ver AuthService),
             // así que se pasa directo a MainPage, sin pedir login de nuevo.
@@ -75,6 +91,9 @@ public partial class RegisterViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    private static async Task VerConsentimientoAsync() => await Shell.Current.GoToAsync(nameof(Views.ConsentimientoPage));
 
     [RelayCommand]
     private static async Task VolverAsync() => await Shell.Current.GoToAsync("..");

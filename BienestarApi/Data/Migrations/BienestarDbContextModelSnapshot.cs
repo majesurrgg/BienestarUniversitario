@@ -129,18 +129,32 @@ namespace BienestarApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ComentarioLoMasUtil")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ComentarioMejoras")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateTime>("FechaAplicacion")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("PuntajeSUS")
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<string>("RespuestasSUS")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
 
                     b.ToTable("EncuestasSUS");
                 });
@@ -228,11 +242,17 @@ namespace BienestarApi.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime?>("FechaAceptaConsentimiento")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VersionConsentimiento")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

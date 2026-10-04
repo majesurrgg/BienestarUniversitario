@@ -16,5 +16,15 @@ public class EncuestaSUS
     /// <summary>Puntaje SUS, 0-100 (promedio ponderado de las 10 preguntas del instrumento).</summary>
     public decimal PuntajeSUS { get; set; }
 
+    /// <summary>
+    /// Las 10 respuestas (1-5) en orden, separadas por coma (ej. "4,2,5,1,4,2,5,1,4,2"),
+    /// para poder reportar el promedio por ítem en la tesis además del total.
+    /// </summary>
+    public string RespuestasSUS { get; set; } = string.Empty;
+
+    // Preguntas abiertas: la parte cualitativa del enfoque mixto de la tesis.
+    public string? ComentarioLoMasUtil { get; set; }
+    public string? ComentarioMejoras { get; set; }
+
     public DateTime FechaAplicacion { get; set; }
 }

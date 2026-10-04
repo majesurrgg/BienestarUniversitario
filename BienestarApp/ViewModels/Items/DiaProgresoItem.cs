@@ -15,15 +15,22 @@ public class DiaProgresoItem
 
     public string FechaTexto => $"{DiasSemana[(int)Fecha.DayOfWeek]} {Fecha:dd/MM}";
 
-    // Ancho de la barra en pixeles (16px por punto de estrés, escala 1-10 =
-    // hasta 160px) — evita necesitar una librería de gráficos para algo tan
-    // simple como una barra horizontal.
-    public double AnchoBarraEstres => NivelEstres * 16.0;
+    public string EstresTexto => $"{NivelEstres}/10";
+
+    public string DetalleTexto =>
+        $"Sueño {CalidadSueno}/5  ·  Ánimo {EstadoAnimo}/5  ·  Actividad {MinutosActividadFisica} min";
+
+    /// <summary>
+    /// Parte llena de la barra, proporcional (0 a 1) sobre la escala 1-10.
+    /// Se usa con AbsoluteLayout en modo proporcional, así la barra ocupa
+    /// siempre el mismo ancho total en cualquier tamaño de pantalla.
+    /// </summary>
+    public Rect LimitesBarraEstres => new(0, 0, Math.Clamp(NivelEstres / 10.0, 0.05, 1), 1);
 
     public Color ColorBarraEstres => NivelEstres switch
     {
-        <= 3 => Color.FromArgb("#2C5D3B"), // verde: estrés bajo
-        <= 6 => Color.FromArgb("#9C6B22"), // ámbar: estrés medio
-        _ => Color.FromArgb("#B3261E"),    // rojo: estrés alto
+        <= 3 => Color.FromArgb("#3E9C7A"), // verde: estrés bajo
+        <= 6 => Color.FromArgb("#E0A33B"), // ámbar: estrés medio
+        _ => Color.FromArgb("#D9534F"),    // rojo: estrés alto
     };
 }

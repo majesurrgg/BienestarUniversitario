@@ -1,5 +1,7 @@
+#if DEBUG
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+#endif
 
 namespace BienestarApp.Services;
 
@@ -25,32 +27,26 @@ namespace BienestarApp.Services;
 /// solo para estos hosts (ver Platforms/Android/Resources/xml/
 /// network_security_config.xml).
 ///
-/// En compilación Release (el APK que instalan las estudiantes en sus
-/// propios celulares, fuera de la red de la autora) se usa siempre la URL
-/// pública de BienestarApi en Azure App Service — ninguna de las
-/// direcciones locales de arriba es alcanzable desde la casa de otra
-/// persona.
+/// Todo lo anterior es solo para DEBUG (probar desde Visual Studio). En
+/// RELEASE (el APK que se reparte a los participantes del piloto) se usa
+/// siempre la API publicada en Azure, por HTTPS.
 /// (.NET MAUI, solo Android)
 /// </summary>
 public static class ApiConfig
 {
+#if DEBUG
     private const string UrlEmulador = "http://10.0.2.2:5178/"; // alias fijo del emulador Android hacia el localhost de la PC anfitriona.
     private const string UrlCelularUsb = "http://localhost:5178/"; // dirección para el celular conectado por USB.
     private const string UrlZonaMovilPc = "http://192.168.137.1:5178/"; // la PC dentro de su propia zona móvil.
     private const string PrefijoZonaMovilPc = "192.168.137.";
-    private const string UrlProduccion = "https://bienestar-api-2026-b3hndpb7aja7gxer.westus2-01.azurewebsites.net/";
 
     // La app se pregunta ¿soy un emulador? ¿estoy en la zona móvil de la PC?
     // y elige la dirección correcta. Se evalúa al abrir la app: si cambias
     // de red (cable <-> WiFi), cierra y vuelve a abrir la app.
-#if DEBUG
     public static string BaseUrl =>
         DeviceInfo.Current.DeviceType == DeviceType.Virtual ? UrlEmulador
         : EstaEnZonaMovilDeLaPc() ? UrlZonaMovilPc
         : UrlCelularUsb;
-#else
-    public static string BaseUrl => UrlProduccion;
-#endif
 
     // Revisa las IPs del propio celular: si alguna es 192.168.137.x, está
     // conectado al WiFi que comparte la PC.
@@ -70,4 +66,12 @@ public static class ApiConfig
             return false;
         }
     }
+#else
+    // API publicada en Azure App Service (ver página "Despliegue en la nube"
+    // en Notion). No es un secreto: cualquiera que instale el APK puede verla;
+    // lo que la protege es el JWT de cada endpoint.
+    private const string UrlProduccion = "https://bienestar-api-2026-b3hndpb7aja7gxer.westus2-01.azurewebsites.net/";
+
+    public static string BaseUrl => UrlProduccion;
+#endif
 }
