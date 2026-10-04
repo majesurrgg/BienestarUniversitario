@@ -480,3 +480,13 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Paquetes Android generados sueltos en la raíz del repo (se regeneran con
+# Archive Manager; no tiene sentido versionarlos, pesan ~30 MB cada uno)
+/*.aab
+/*.apk
+
+# Almacén de firma de la app (keystore): es un secreto, NUNCA al repo
+# público — sin él, nadie podría publicar actualizaciones de la app.
+*.keystore
+*.jks
