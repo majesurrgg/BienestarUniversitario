@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BienestarApp.Views.RespiraPage"
              Title="Respira"
-             Background="{AppThemeBinding Light={StaticResource FondoDegradadoClaro}, Dark={StaticResource FondoDegradadoOscuro}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource FondoSuaveClaro}, Dark={StaticResource FondoSuaveOscuro}}">
 
     <Grid RowDefinitions="*,Auto" Padding="30,20">
 
