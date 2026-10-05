@@ -54,6 +54,16 @@ public partial class RegisterViewModel : BaseViewModel
             return;
         }
 
+        // La API exige 8 caracteres mínimo (MinLength en RegisterRequest) y
+        // devuelve ese error en un formato que la app no sabe mostrar bien
+        // (ValidationProblemDetails en vez de { message }), así que se valida
+        // acá antes para dar un mensaje claro en vez de uno genérico.
+        if (Password.Length < 8)
+        {
+            MensajeError = "La contraseña debe tener al menos 8 caracteres.";
+            return;
+        }
+
         if (!AceptaConsentimiento)
         {
             MensajeError = "Para participar, lee el consentimiento informado y marca «Acepto participar».";

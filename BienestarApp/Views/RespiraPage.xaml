@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BienestarApp.Views.RespiraPage"
+             Title="Respira"
+             Background="{AppThemeBinding Light={StaticResource FondoDegradadoClaro}, Dark={StaticResource FondoDegradadoOscuro}}">
+
+    <Grid RowDefinitions="*,Auto" Padding="30,20">
+
+        <VerticalStackLayout Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="28">
+
+            <Label Text="Un minuto para ti" Style="{StaticResource Headline}" HorizontalOptions="Center" />
+            <Label Text="Sigue el círculo: se agranda al inhalar, se queda quieto, y se achica al exhalar."
+                   FontSize="13" HorizontalOptions="Center" HorizontalTextAlignment="Center" MaximumWidthRequest="280" />
+
+            <Border x:Name="Circulo"
+                    WidthRequest="170" HeightRequest="170"
+                    StrokeShape="RoundRectangle 85"
+                    Stroke="{StaticResource Primary}"
+                    StrokeThickness="3"
+                    BackgroundColor="{AppThemeBinding Light=#D7ECEA, Dark=#1A3D3A}"
+                    HorizontalOptions="Center">
+                <Label x:Name="InstruccionLabel"
+                       Text="Inhala..."
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
+
+        </VerticalStackLayout>
+
+        <Button Grid.Row="1" Text="Terminar" Clicked="OnTerminarClicked"
+                BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+
+    </Grid>
+
+</ContentPage>

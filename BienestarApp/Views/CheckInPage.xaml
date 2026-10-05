@@ -4,35 +4,93 @@
              xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
              x:Class="BienestarApp.Views.CheckInPage"
              x:DataType="viewmodels:CheckInViewModel"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light={StaticResource FondoSuaveClaro}, Dark={StaticResource FondoSuaveOscuro}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="16">
 
             <Label Text="¿Cómo estuvo tu día?" Style="{StaticResource Headline}" HorizontalOptions="Center" />
 
+            <!-- Pausa de respiración: para cuando el estrés del momento no
+                 espera a terminar el formulario. Disponible siempre, no solo
+                 si ya se hizo el check-in de hoy. -->
+            <Button Text="🌬️ Respira un minuto" Command="{Binding IrARespirarCommand}"
+                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 
             <!-- Formulario: solo si todavía no registró el día de hoy -->
-            <VerticalStackLayout Spacing="16" IsVisible="{Binding MostrarFormulario}">
+            <VerticalStackLayout Spacing="18" IsVisible="{Binding MostrarFormulario}">
 
-                <Label Text="{Binding NivelEstres, StringFormat='Nivel de estrés: {0:F0} / 10'}" FontAttributes="Bold" />
-                <Slider Minimum="1" Maximum="10" Value="{Binding NivelEstres}" />
-                <Grid ColumnDefinitions="*,*">
-                    <Label Text="1 = muy bajo" FontSize="12" />
-                    <Label Grid.Column="1" Text="10 = muy alto" FontSize="12" HorizontalOptions="End" />
-                </Grid>
+                <!-- Las tres tarjetas de abajo son autoevaluación personal
+                     (con emoji), así que usan el mismo rosa sutil que ya se
+                     usaba para "logros" en Mi progreso — la de Actividad
+                     física es solo un conteo, se queda en la tarjeta neutra. -->
+                <Border StrokeShape="RoundRectangle 12" Padding="18"
+                        Stroke="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
+                    <VerticalStackLayout Spacing="6">
+                        <Label FontAttributes="Bold">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding EmojiEstres}" FontSize="22" />
+                                    <Span Text="  Nivel de estrés: " />
+                                    <Span Text="{Binding NivelEstres, StringFormat='{0:F0} / 10'}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Slider Minimum="1" Maximum="10" Value="{Binding NivelEstres}" />
+                        <Grid ColumnDefinitions="*,*">
+                            <Label Text="1 = muy bajo" FontSize="12" />
+                            <Label Grid.Column="1" Text="10 = muy alto" FontSize="12" HorizontalOptions="End" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
-                <Label Text="{Binding CalidadSueno, StringFormat='Calidad de sueño: {0:F0} / 5'}" FontAttributes="Bold" />
-                <Slider Minimum="1" Maximum="5" Value="{Binding CalidadSueno}" />
-                <Label Text="{Binding DescripcionSueno}" FontSize="12" HorizontalOptions="Center" />
+                <Border StrokeShape="RoundRectangle 12" Padding="18"
+                        Stroke="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
+                    <VerticalStackLayout Spacing="6">
+                        <Label FontAttributes="Bold">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding EmojiSueno}" FontSize="22" />
+                                    <Span Text="  Calidad de sueño: " />
+                                    <Span Text="{Binding CalidadSueno, StringFormat='{0:F0} / 5'}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Slider Minimum="1" Maximum="5" Value="{Binding CalidadSueno}" />
+                        <Label Text="{Binding DescripcionSueno}" FontSize="12" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
 
-                <Label Text="{Binding EstadoAnimo, StringFormat='Estado de ánimo: {0:F0} / 5'}" FontAttributes="Bold" />
-                <Slider Minimum="1" Maximum="5" Value="{Binding EstadoAnimo}" />
-                <Label Text="{Binding DescripcionAnimo}" FontSize="12" HorizontalOptions="Center" />
+                <Border StrokeShape="RoundRectangle 12" Padding="18"
+                        Stroke="{AppThemeBinding Light={StaticResource Acento}, Dark={StaticResource AcentoOscuro}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AcentoFondo}, Dark={StaticResource AcentoFondoOscuro}}">
+                    <VerticalStackLayout Spacing="6">
+                        <Label FontAttributes="Bold">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding EmojiAnimo}" FontSize="22" />
+                                    <Span Text="  Estado de ánimo: " />
+                                    <Span Text="{Binding EstadoAnimo, StringFormat='{0:F0} / 5'}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Slider Minimum="1" Maximum="5" Value="{Binding EstadoAnimo}" />
+                        <Label Text="{Binding DescripcionAnimo}" FontSize="12" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
 
-                <Label Text="{Binding MinutosActividadFisica, StringFormat='Actividad física: {0:F0} minutos'}" FontAttributes="Bold" />
-                <Stepper Minimum="0" Maximum="600" Increment="10" Value="{Binding MinutosActividadFisica}" HorizontalOptions="Center" />
+                <Border Style="{StaticResource CampoTarjeta}" Padding="18">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="🏃 Actividad física" FontAttributes="Bold" />
+                        <Label Text="{Binding MinutosActividadFisica, StringFormat='{0:F0} minutos'}" HorizontalOptions="Center" FontSize="20" />
+                        <Stepper Minimum="0" Maximum="600" Increment="10" Value="{Binding MinutosActividadFisica}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <Label Text="{Binding MensajeError}"
                        TextColor="Red"

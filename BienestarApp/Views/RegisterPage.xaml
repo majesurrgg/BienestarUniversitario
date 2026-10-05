@@ -4,24 +4,37 @@
              xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
              x:Class="BienestarApp.Views.RegisterPage"
              x:DataType="viewmodels:RegisterViewModel"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light={StaticResource FondoSuaveClaro}, Dark={StaticResource FondoSuaveOscuro}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="14">
 
-            <Label Text="Crear cuenta" Style="{StaticResource Headline}" />
+            <Label Text="Crear cuenta" Style="{StaticResource Headline}" Margin="0,0,0,6" />
 
-            <Entry Placeholder="Nombre completo" Text="{Binding Nombre}" />
-            <Entry Placeholder="Código universitario" Text="{Binding CodigoUniversitario}" />
-            <Entry Placeholder="Carrera" Text="{Binding Carrera}" />
-            <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
-            <Grid ColumnDefinitions="*,Auto">
-                <Entry Placeholder="Contraseña (mínimo 8 caracteres)" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
-                <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
-                        BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
-                        SemanticProperties.Description="Mostrar u ocultar la contraseña" />
-            </Grid>
-            <Entry Placeholder="Código de invitación" Text="{Binding CodigoInvitacion}" />
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Entry Placeholder="Nombre completo" Text="{Binding Nombre}" />
+            </Border>
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Entry Placeholder="Código universitario" Text="{Binding CodigoUniversitario}" />
+            </Border>
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Entry Placeholder="Carrera" Text="{Binding Carrera}" />
+            </Border>
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
+            </Border>
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Entry Placeholder="Contraseña (mínimo 8 caracteres)" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
+                    <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
+                            BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
+                            SemanticProperties.Description="Mostrar u ocultar la contraseña" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource CampoTarjeta}">
+                <Entry Placeholder="Código de invitación" Text="{Binding CodigoInvitacion}" />
+            </Border>
 
             <!-- Consentimiento informado: obligatorio (Ley 29733, datos de salud).
                  La API también lo exige y guarda cuándo y qué versión se aceptó. -->

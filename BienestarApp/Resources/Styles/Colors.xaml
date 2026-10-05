@@ -50,4 +50,11 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <!-- Fondo plano y suave para pantallas que antes eran blanco/negro puro
+         (login, registro, check-in, principal) — el mismo tono claro que ya
+         se usaba en las tarjetas de "Paso 1/2" de MainPage, así que no
+         introduce un color nuevo, solo lo extiende a toda la pantalla. -->
+    <Color x:Key="FondoSuaveClaro">#EAF3F2</Color>
+    <Color x:Key="FondoSuaveOscuro">#1C2023</Color>
 </ResourceDictionary>

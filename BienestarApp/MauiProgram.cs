@@ -43,6 +43,7 @@ public static class MauiProgram
 		services.AddTransient<Views.ProgresoPage>();
 		services.AddTransient<Views.ConsentimientoPage>();
 		services.AddTransient<Views.EncuestaSusPage>();
+		services.AddTransient<Views.RespiraPage>();
 
 		// ViewModels
 		services.AddTransient<LoginViewModel>();

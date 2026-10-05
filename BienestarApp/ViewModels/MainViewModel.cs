@@ -135,6 +135,9 @@ public partial class MainViewModel : BaseViewModel
     private static async Task IrAEncuestaSusAsync() => await Shell.Current.GoToAsync(nameof(Views.EncuestaSusPage));
 
     [RelayCommand]
+    private static async Task IrARespirarAsync() => await Shell.Current.GoToAsync(nameof(Views.RespiraPage));
+
+    [RelayCommand]
     private async Task CerrarSesionAsync() => await VolverAlLoginAsync();
 
     private async Task VolverAlLoginAsync()

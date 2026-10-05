@@ -4,33 +4,46 @@
              xmlns:viewmodels="clr-namespace:BienestarApp.ViewModels"
              x:Class="BienestarApp.Views.LoginPage"
              x:DataType="viewmodels:LoginViewModel"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource OffBlack}}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="16" VerticalOptions="Center">
+    <Grid>
+        <!-- Imagen de fondo (no color plano): formas suaves en la paleta de
+             la app, concentradas en las esquinas para que el centro (logo y
+             campos) quede siempre legible. Solo en Login, es la primera
+             pantalla que ve cualquiera. -->
+        <Image Source="fondo_login.svg" Aspect="AspectFill" IsVisible="{AppThemeBinding Light=True, Dark=False}" />
 
-            <Image Source="logo_bienestar.svg" HeightRequest="72" WidthRequest="72" HorizontalOptions="Center" Margin="0,0,0,8" />
-            <Label Text="Bienestar Universitario" Style="{StaticResource Headline}" HorizontalOptions="Center" />
-            <Label Text="Inicia sesión para continuar" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" />
+        <ScrollView>
+            <VerticalStackLayout Padding="30" Spacing="18" VerticalOptions="Center">
 
-            <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
-            <Grid ColumnDefinitions="*,Auto">
-                <Entry Placeholder="Contraseña" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
-                <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
-                        BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
-                        SemanticProperties.Description="Mostrar u ocultar la contraseña" />
-            </Grid>
+                <Image Source="logo_bienestar.svg" HeightRequest="84" WidthRequest="84" HorizontalOptions="Center" Margin="0,0,0,8" />
+                <Label Text="Bienestar Universitario" Style="{StaticResource Headline}" HorizontalOptions="Center" />
+                <Label Text="Inicia sesión para continuar" Style="{StaticResource SubHeadline}" HorizontalOptions="Center" Margin="0,0,0,8" />
 
-            <Label Text="{Binding MensajeError}"
-                   TextColor="Red"
-                   IsVisible="{Binding MensajeError, Converter={StaticResource StringNotEmptyConverter}}" />
+                <Border Style="{StaticResource CampoTarjeta}">
+                    <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
+                </Border>
+                <Border Style="{StaticResource CampoTarjeta}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Entry Placeholder="Contraseña" IsPassword="{Binding OcultarPassword}" Text="{Binding Password}" />
+                        <Button Grid.Column="1" Text="{Binding IconoOjo}" Command="{Binding AlternarPasswordCommand}"
+                                BackgroundColor="Transparent" FontSize="20" Padding="8,0" WidthRequest="48"
+                                SemanticProperties.Description="Mostrar u ocultar la contraseña" />
+                    </Grid>
+                </Border>
 
-            <Button Text="Ingresar" Command="{Binding LoginCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+                <Label Text="{Binding MensajeError}"
+                       TextColor="Red"
+                       IsVisible="{Binding MensajeError, Converter={StaticResource StringNotEmptyConverter}}" />
 
-            <Button Text="Crear una cuenta" Command="{Binding IrARegistroCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+                <Button Text="Ingresar" Command="{Binding LoginCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <Button Text="Crear una cuenta" Command="{Binding IrARegistroCommand}" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

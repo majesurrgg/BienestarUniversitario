@@ -21,10 +21,12 @@ public partial class CheckInViewModel : BaseViewModel
     // Los Slider/Stepper de MAUI trabajan con double; se redondean al
     // moverse y se envían como int (las escalas son enteras).
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EmojiEstres))]
     private double nivelEstres = 5;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DescripcionSueno))]
+    [NotifyPropertyChangedFor(nameof(EmojiSueno))]
     private double calidadSueno = 3;
 
     [ObservableProperty]
@@ -32,6 +34,7 @@ public partial class CheckInViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DescripcionAnimo))]
+    [NotifyPropertyChangedFor(nameof(EmojiAnimo))]
     private double estadoAnimo = 3;
 
     [ObservableProperty]
@@ -63,6 +66,14 @@ public partial class CheckInViewModel : BaseViewModel
 
     public string DescripcionAnimo => DescribirEscala5((int)EstadoAnimo, "Muy malo", "Malo", "Regular", "Bueno", "Muy bueno");
 
+    // Un vistazo rápido y amigable de lo que se está por guardar — la escala
+    // de estrés es 1-10 (se agrupa en 5 tramos), sueño y ánimo ya son 1-5.
+    public string EmojiEstres => DescribirEscala5(Math.Clamp((int)Math.Ceiling(NivelEstres / 2.0), 1, 5), "😌", "🙂", "😐", "😣", "😫");
+
+    public string EmojiSueno => DescribirEscala5((int)CalidadSueno, "😫", "😕", "😐", "🙂", "😴");
+
+    public string EmojiAnimo => DescribirEscala5((int)EstadoAnimo, "😢", "🙁", "😐", "🙂", "😄");
+
     public async Task InicializarAsync()
     {
         MensajeError = string.Empty;
@@ -87,6 +98,9 @@ public partial class CheckInViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    private static async Task IrARespirarAsync() => await Shell.Current.GoToAsync(nameof(Views.RespiraPage));
 
     [RelayCommand]
     private async Task GuardarAsync()

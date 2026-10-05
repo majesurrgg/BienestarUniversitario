@@ -18,6 +18,16 @@
         <Setter Property="StrokeThickness" Value="1"/>
     </Style>
 
+    <!-- "Tarjeta" redondeada para envolver un Entry/Editor y que se vea como
+         un campo de formulario moderno en vez de la línea nativa suelta. -->
+    <Style TargetType="Border" x:Key="CampoTarjeta">
+        <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark={StaticResource Gray950}}"/>
+        <Setter Property="Padding" Value="16,2"/>
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
